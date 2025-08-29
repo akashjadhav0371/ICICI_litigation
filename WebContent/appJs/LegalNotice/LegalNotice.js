@@ -797,6 +797,26 @@ function deleteLegalRow(filecount) {
          {
          	$('#lega_noti_assigned_to_id').popover('destroy');
         }
+
+
+	    if (
+		    !validateAndShowPopover("#lega_noti_opposite_party") ||
+		    !validateAndShowPopover("#lega_noti_reference_no") ||
+			!validateAndShowPopover("#lega_noti_addressed_to") ||
+			!validateAndShowPopover("#lega_noti_opposite_party_advocate") ||
+			!validateAndShowPopover("#lega_noti_relevant_law") ||
+			!validateAndShowPopover("#lega_noti_comments") ||
+			!validateAndShowPopover("#lega_noti_prayer_details") ||
+		    !validateAndShowPopover("#lega_noti_intern_cont_person")
+		) {
+		    return false;
+		}
+
+		if(!validateNumberAndShowPopover("#lega_noti_amount_involved")||
+	       !validateNumberAndShowPopover("#lega_noti_interest"))
+		{
+			return false;
+		}
     /*	
     	if (lega_noti_intern_cont_person == 0) {
          	 
@@ -1060,8 +1080,25 @@ function validateDraft(){
          {
          	$('#lega_noti_category_id').popover('destroy');
         }	
-    	
-    	
+
+		if (
+		    !validateAndShowPopover("#lega_noti_opposite_party") ||
+		    !validateAndShowPopover("#lega_noti_reference_no") ||
+			!validateAndShowPopover("#lega_noti_addressed_to") ||
+			!validateAndShowPopover("#lega_noti_opposite_party_advocate") ||
+			!validateAndShowPopover("#lega_noti_relevant_law") ||
+			!validateAndShowPopover("#lega_noti_comments") ||
+			!validateAndShowPopover("#lega_noti_prayer_details") ||
+		    !validateAndShowPopover("#lega_noti_intern_cont_person")
+		) {
+		    return false;
+		}
+
+		if(!validateNumberAndShowPopover("#lega_noti_amount_involved")||
+	       !validateNumberAndShowPopover("#lega_noti_interest"))
+		{
+			return false;
+		}
     	
     	
     	/*if(lega_noti_by_against =="Against"){

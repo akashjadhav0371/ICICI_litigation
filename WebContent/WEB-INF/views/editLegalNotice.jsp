@@ -722,5 +722,6 @@
 
 					});
 </script>
+<script src="appJs/common/utils.js"></script>
 <script src="appJs/LegalNotice/LegalNotice.js"></script>
 <jsp:include page="/WEB-INF/views/footer.jsp"></jsp:include>

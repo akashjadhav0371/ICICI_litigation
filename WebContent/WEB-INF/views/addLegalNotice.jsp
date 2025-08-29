@@ -720,6 +720,7 @@
 					});
 </script>
 
+<script src="appJs/common/utils.js"></script>
 <script src="appJs/LegalNotice/LegalNotice.js"></script>
 <script src="appJs/Currency/money.js"></script>
 <script src="appJs/Currency/money.min.js"></script>
