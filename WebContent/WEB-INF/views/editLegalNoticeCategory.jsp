@@ -7,6 +7,7 @@
 <jsp:include page="/WEB-INF/views/header.jsp"></jsp:include>
 
 
+
 <div class="page_container">
 <!--heading text-->
 
@@ -67,6 +68,7 @@
 			<div style="clear:both"></div>
 			
 </div>
+
 
 <script src="appJs/LegalNotice/LegalNoticeCategory.js"></script>
 

@@ -41,7 +41,7 @@ import lcmt.service.UtilitiesService;
  * Date: 24/02/2016
  * Updated By: Mugdha Chandratre
  * Updated Date: 23/02/2016
- * 
+ *
  * */
 
 @Repository(value = "userDao")
@@ -51,7 +51,7 @@ public class UserDaoImpl implements UserDao {
 	@PersistenceContext
 	private EntityManager em;
 
-	@Autowired 
+	@Autowired
 	RandomPasswordGenService randomPasswordGenService;
 
 	@Autowired
@@ -64,7 +64,8 @@ public class UserDaoImpl implements UserDao {
 	private @Value("#{config['mail_from'] ?: 'null'}") String mailFrom;
 	private @Value("#{config['project_name'] ?: 'null'}") String projectName;
 	private @Value("#{config['project_url'] ?: 'null'}") String url;
-	
+	private @Value("#{config['login_max_fail_count'] ?: 10}") int maxFailCount;
+
 	private @Value("#{ldapconfig['ldap_ip'] ?: 'null'}") String ldap_ip;
 	private @Value("#{ldapconfig['ldap_port'] ?: 'null'}") int ldap_port;
 	private @Value("#{ldapconfig['serviceuserdn'] ?: 'null'}") String serviceuserdn;
@@ -83,46 +84,57 @@ public class UserDaoImpl implements UserDao {
 			 * + "' AND user_enable_status = 1"; Query queryNew =
 			 * em.createNativeQuery(sqlNew, User.class);
 			 */
-		  
-	        String sqlNew = "SELECT * FROM mst_user WHERE user_username = :username AND user_enable_status = 1";
-	        Query queryNew = em.createNativeQuery(sqlNew, User.class);
-	        queryNew.setParameter("username", username);  // <-- Secure parameter binding
 
-	        
+			String sqlNew = "SELECT * FROM mst_user WHERE user_username = :username AND user_enable_status = 1";
+			Query queryNew = em.createNativeQuery(sqlNew, User.class);
+			queryNew.setParameter("username", username);  // <-- Secure parameter binding
+			//System.out.println(" User DAO authenticateUser ");
+
 			if (!queryNew.getResultList().isEmpty()) {
 				//System.out.println("In first if  !query.getResultList().isEmpty() ");
 				User user = (User) queryNew.getSingleResult();
 
-				
-					// System.out.println("In 3 if user != null ");
-					if (user != null && user.getUser_username().equalsIgnoreCase(username) && user.getUser_enable_status().equals("1")) {
-						// System.out.println("In 4 iF");
-						if (user.getUser_userpassword().equals(password)) {
-					//	if (authenticateUserLDAP(username, password)) {
-							System.out.println("end method");
-								if(user.getUser_default_password_changed().equals("0")){
-									session.setAttribute("firstLogin", "1");
-								}
-								else{
-									session.setAttribute("firstLogin", "0");
-								}
-								session.setAttribute("sess_user_role", user.getUser_role_id());
-								session.setAttribute("sess_user_report_to", user.getUser_report_to());
-								return Integer.toString(user.getUser_id());
-							
-							}
 
-							else {
-								return "Incorrect password";
-							}
-							// session.setAttribute("sess_user_role",
-							// user.getUser_role_id());
-							// session.setAttribute("sess_user_report_to",
-							// user.getUser_report_to());
-							// return Integer.toString(user.getUser_id());
-						} else {
-							return "Incorrect password";
+				//System.out.println("In 3 if user != null ");
+				if (user != null && user.getUser_username().equalsIgnoreCase(username) && user.getUser_enable_status().equals("1")) {
+					//System.out.println("In 4 iF");
+
+					//System.out.println(" Db password"+user.getUser_userpassword());
+					//System.out.println(" entered pwd"+password);
+					if (user.getUser_userpassword().equals(password)) {
+						//	if (authenticateUserLDAP(username, password)) {
+						//System.out.println("end method");
+						if(user.getUser_default_password_changed().equals("0")){
+							session.setAttribute("firstLogin", "1");
 						}
+						else{
+							session.setAttribute("firstLogin", "0");
+						}
+						session.setAttribute("sess_user_role", user.getUser_role_id());
+						session.setAttribute("sess_user_report_to", user.getUser_report_to());
+						session.setAttribute("login_fail_count", 0);
+						user.setUser_login_fail_count(0);
+						updateUser(user);
+						return Integer.toString(user.getUser_id());
+
+					}
+
+					else {
+						Integer cnt = user.getUser_login_fail_count();
+						user.setUser_login_fail_count(cnt==null ? 1 : ++cnt);
+						if(cnt>=maxFailCount) {user.setUser_enable_status("0");}
+						session.setAttribute("login_fail_count", cnt);
+						updateUser(user);
+						return "Incorrect password";
+					}
+					// session.setAttribute("sess_user_role",
+					// user.getUser_role_id());
+					// session.setAttribute("sess_user_report_to",
+					// user.getUser_report_to());
+					// return Integer.toString(user.getUser_id());
+				} else {
+					return "Incorrect password";
+				}
 					/*} else {
 						return "Incorrect username";
 					}*/
@@ -140,98 +152,98 @@ public class UserDaoImpl implements UserDao {
 		}
 
 	}
-	
+
 	// SSO feature-using Ldap properties
 
-		@Override
-		public boolean authenticateUserLDAP(String username, String password) {
-			// service user
-			System.out.println("username" + username + "password" + password);
-		    System.out.println("In authencticateUserLDAP");
-			
-		    String serviceUserDN = serviceuserdn;
-			String serviceUserPassword = serviceuserpassword;
-			
-			System.out.println("confiusername" + serviceUserDN + "confipass" + serviceUserPassword);
+	@Override
+	public boolean authenticateUserLDAP(String username, String password) {
+		// service user
+		//System.out.println("username" + username + "password" + password);
+		// System.out.println("In authencticateUserLDAP");
 
-			// Following code is to decrypt string. Password is stored as encrypted
-			// in ldap.properties
-			//StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
-			//encryptor.setPassword("jasypt");// Without setting this password this
-											// will not work. This password has be
-											// common for encrypting and decrypting
-			// String enString = encryptor.encrypt("Mahesh");
-			// System.out.println("Encrypted String:"+serviceUserPassword);
-			String dString = serviceUserPassword;
-			//System.out.println("Decrypted String:" + dString);
+		String serviceUserDN = serviceuserdn;
+		String serviceUserPassword = serviceuserpassword;
 
-			// LDAP connection info
-			String ldap = ldap_ip;
-			int port = ldap_port;
-			String ldapUrl = "ldap://" + ldap + ":" + port;
+		//System.out.println("confiusername" + serviceUserDN + "confipass" + serviceUserPassword);
 
-			// first create the service context
-			DirContext serviceCtx = null;
-			try {
-				
-				System.out.println("in try");
-				// use the service user to authenticate
-				Properties serviceEnv = new Properties();
-				serviceEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-				serviceEnv.put(Context.PROVIDER_URL, ldapUrl);
-				serviceEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
-				serviceEnv.put(Context.SECURITY_PRINCIPAL, serviceUserDN);
-				serviceEnv.put(Context.SECURITY_CREDENTIALS, dString);
-				serviceCtx = new InitialDirContext(serviceEnv);
+		// Following code is to decrypt string. Password is stored as encrypted
+		// in ldap.properties
+		//StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+		//encryptor.setPassword("jasypt");// Without setting this password this
+		// will not work. This password has be
+		// common for encrypting and decrypting
+		// String enString = encryptor.encrypt("Mahesh");
+		// System.out.println("Encrypted String:"+serviceUserPassword);
+		String dString = serviceUserPassword;
+		//System.out.println("Decrypted String:" + dString);
 
-				// user to authenticate
-				String identifyingAttribute = identifying_attribute;
-				String identifier = username;
-				// String password = "Lexcare@345";
-				 System.out.println("This is service user: "+serviceUserDN);
-				//System.out.println("This is base: " + userbase);
-				String base = userbase;
+		// LDAP connection info
+		String ldap = ldap_ip;
+		int port = ldap_port;
+		String ldapUrl = "ldap://" + ldap + ":" + port;
 
-				// we don't need all attributes, just let it get the identifying one
-				String[] attributeFilter = {identifyingAttribute};
-				SearchControls sc = new SearchControls();
-				sc.setReturningAttributes(attributeFilter);
-				sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		// first create the service context
+		DirContext serviceCtx = null;
+		try {
 
-				// use a search filter to find only the user we want to authenticate
-				String searchFilter = "(" + identifyingAttribute + "=" + identifier + ")";
-				NamingEnumeration<SearchResult> results = serviceCtx.search(base, searchFilter, sc);
-				//System.out.println("atribute" +attributeFilter);
-				if (results.hasMore()) {
-					// get the users DN (distinguishedName) from the result
-					SearchResult result = results.next();
-					String distinguishedName = result.getNameInNamespace();
+			//System.out.println("in try");
+			// use the service user to authenticate
+			Properties serviceEnv = new Properties();
+			serviceEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+			serviceEnv.put(Context.PROVIDER_URL, ldapUrl);
+			serviceEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
+			serviceEnv.put(Context.SECURITY_PRINCIPAL, serviceUserDN);
+			serviceEnv.put(Context.SECURITY_CREDENTIALS, dString);
+			serviceCtx = new InitialDirContext(serviceEnv);
 
-					// attempt another authentication, now with the user
-					Properties authEnv = new Properties();
-					authEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-					authEnv.put(Context.PROVIDER_URL, ldapUrl);
-					authEnv.put(Context.SECURITY_PRINCIPAL, distinguishedName);
-					authEnv.put(Context.SECURITY_CREDENTIALS, password);
-					new InitialDirContext(authEnv);
+			// user to authenticate
+			String identifyingAttribute = identifying_attribute;
+			String identifier = username;
+			// String password = "Lexcare@345";
+			//System.out.println("This is service user: "+serviceUserDN);
+			//System.out.println("This is base: " + userbase);
+			String base = userbase;
 
-					//System.out.println("Authentication successful");
-					return true;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				if (serviceCtx != null) {
-					try {
-						serviceCtx.close();
-					} catch (NamingException e) {
-						e.printStackTrace();
-					}
+			// we don't need all attributes, just let it get the identifying one
+			String[] attributeFilter = {identifyingAttribute};
+			SearchControls sc = new SearchControls();
+			sc.setReturningAttributes(attributeFilter);
+			sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+			// use a search filter to find only the user we want to authenticate
+			String searchFilter = "(" + identifyingAttribute + "=" + identifier + ")";
+			NamingEnumeration<SearchResult> results = serviceCtx.search(base, searchFilter, sc);
+			//System.out.println("atribute" +attributeFilter);
+			if (results.hasMore()) {
+				// get the users DN (distinguishedName) from the result
+				SearchResult result = results.next();
+				String distinguishedName = result.getNameInNamespace();
+
+				// attempt another authentication, now with the user
+				Properties authEnv = new Properties();
+				authEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+				authEnv.put(Context.PROVIDER_URL, ldapUrl);
+				authEnv.put(Context.SECURITY_PRINCIPAL, distinguishedName);
+				authEnv.put(Context.SECURITY_CREDENTIALS, password);
+				new InitialDirContext(authEnv);
+
+				//System.out.println("Authentication successful");
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (serviceCtx != null) {
+				try {
+					serviceCtx.close();
+				} catch (NamingException e) {
+					e.printStackTrace();
 				}
 			}
-			System.err.println("Authentication failed");
-			return false;
 		}
+		System.err.println("Authentication failed");
+		return false;
+	}
 
 	// Method Created By: Mugdha Chandratre 01/03/2016
 	// Method Purpose: Save the user in the database
@@ -822,7 +834,7 @@ public class UserDaoImpl implements UserDao {
 
 			/*SONObject jsonObject = (JSONObject) new JSONParser().parse(json);
 			int umap_id = Integer.parseInt(jsonObject.get("umap_id").toString());
-			//int user_id = Integer.parseInt(session.getAttribute("sess_user_id").toString());			 
+			//int user_id = Integer.parseInt(session.getAttribute("sess_user_id").toString());
 			String sql_per = "SELECT count(*) FROM `cfg_task_user_mapping` join cfg_user_entity_mapping ON cfg_user_entity_mapping.umap_orga_id = cfg_task_user_mapping.tmap_orga_id AND cfg_user_entity_mapping.umap_loca_id = cfg_task_user_mapping.tmap_loca_id AND cfg_user_entity_mapping.umap_dept_id = cfg_task_user_mapping.tmap_dept_id AND cfg_user_entity_mapping.umap_user_id = cfg_task_user_mapping.tmap_pr_user_id WHERE cfg_user_entity_mapping.umap_id = "+umap_id;
 			Query query = em.createNativeQuery(sql_per);
 
@@ -890,8 +902,8 @@ public class UserDaoImpl implements UserDao {
 						Transport.send(message);
 						utilitiesService.addMailToLog(user_mailId,"Reset Password");
 						return "true";
-					} 
-					catch (Exception e) 
+					}
+					catch (Exception e)
 					{
 						e.printStackTrace();
 					}
@@ -930,7 +942,7 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public String authenticateUserPeopleSoft(String empno, HttpSession session) {
 		try {
-			
+
 
 			if(empno != ""){
 				String sqlNew = "SELECT * FROM mst_user where user_employee_id =  '"+ empno +"'" ;
@@ -997,12 +1009,12 @@ public class UserDaoImpl implements UserDao {
 		}
 		return null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<String> getUserFullName(){
 		try{
 			String sql ="Select user_first_name From mst_user" ;
-			
+
 			Query query = em.createNativeQuery(sql);
 			return query.getResultList();
 		} catch (Exception e) {

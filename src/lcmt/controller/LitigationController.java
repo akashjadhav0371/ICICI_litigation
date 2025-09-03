@@ -2,13 +2,16 @@ package lcmt.controller;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,7 +66,7 @@ import lcmt.service.UtilitiesService;
  * Date: 09/08/2016
  * Updated By:
  * Updated Date:
- * 
+ *
  * */
 
 @Controller
@@ -99,6 +102,8 @@ public class LitigationController {
 	InternalLitigationService internalLitigationService;
 	@Autowired
 	UserDao userDao;
+
+	private static final Set<Integer> ALLOWED_ROLES = new HashSet<>(Arrays.asList(1, 5, 7, 8, 9));
 
 	// Method Created : Harshad Padole
 	// Method Purpose : Add litigation type
@@ -181,7 +186,7 @@ public class LitigationController {
 		return null;
 	}
 
-	
+
 	// Method Created : Harshad Padole
 	// Method Purpose : Delete litigation type
 	@RequestMapping(value = "/deleteLitigationType", method = RequestMethod.POST)
@@ -198,7 +203,7 @@ public class LitigationController {
 		}
 		return null;
 	}
-	
+
 
 	// Method Created : Harshad Padole
 	// Method Purpose : Delete litigation type
@@ -223,20 +228,43 @@ public class LitigationController {
 	@RequestMapping(value = "/addLitigation", method = RequestMethod.GET)
 	public ModelAndView addLitigation(HttpSession session) {
 		try {
-			ModelAndView modelAndView = new ModelAndView("addLitigation", "litigation", new Litigation());
-			modelAndView.addObject("allOrganizations", entityMappingService.getOrganizationByUserId(session));
-			modelAndView.addObject("litigation_type_list", litigationService.getAllLitiType());
-			modelAndView.addObject("external_counsel_list", externalCounselService.getAll());
-			modelAndView.addObject("liti_code", internalLitigationService.getAll());
-			modelAndView.addObject("user_legal_department", userService.getAll());
-			// modelAndView.addObject("user_socndary_department",userService.getAll());
-			modelAndView.addObject("listAdvocate", advocateService.getAll());
-			modelAndView.addObject("allLawFirm", lawFirmService.getAllLawFirm());
-			modelAndView.addObject("allCurrency", currencyService.getAll());
-			modelAndView.addObject("AllCourt", courtService.getAll());
-			modelAndView.addObject("allUsers", userService.getAllUser());
-			// modelAndView.addObject("liti_refe_no",
-			// litigationService.getAllLitigationClientId());
+
+			Integer userRole = (Integer) session.getAttribute("sess_user_role");
+			if (userRole != null && ALLOWED_ROLES.contains(userRole)) {
+				ModelAndView modelAndView = new ModelAndView("addLitigation", "litigation", new Litigation());
+				modelAndView.addObject("allOrganizations", entityMappingService.getOrganizationByUserId(session));
+				modelAndView.addObject("litigation_type_list", litigationService.getAllLitiType());
+				modelAndView.addObject("external_counsel_list", externalCounselService.getAll());
+				modelAndView.addObject("liti_code", internalLitigationService.getAll());
+				modelAndView.addObject("user_legal_department", userService.getAll());
+				// modelAndView.addObject("user_socndary_department",userService.getAll());
+				modelAndView.addObject("listAdvocate", advocateService.getAll());
+				modelAndView.addObject("allLawFirm", lawFirmService.getAllLawFirm());
+				modelAndView.addObject("allCurrency", currencyService.getAll());
+				modelAndView.addObject("AllCourt", courtService.getAll());
+				modelAndView.addObject("allUsers", userService.getAllUser());
+				// modelAndView.addObject("liti_refe_no",
+				// litigationService.getAllLitigationClientId());
+
+				return modelAndView;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		return null;
+	}
+
+
+	// Method Created : Akash JAdhav
+	// Method Purpose : Show Customisable Listing Page
+	@RequestMapping(value = "/customisablelist", method = RequestMethod.GET)
+	public ModelAndView customisablelist(HttpSession session) {
+		try {
+
+			//	ModelAndView modelAndView = new ModelAndView("customisablelist", "litigation", new Litigation());
+			ModelAndView modelAndView = new ModelAndView("customisablelist", "list_litigation",
+					litigationService.getAllListLitigation(session));
 
 			return modelAndView;
 		} catch (Exception e) {
@@ -244,24 +272,6 @@ public class LitigationController {
 			return null;
 		}
 	}
-	
-	
-	// Method Created : Akash JAdhav
-		// Method Purpose : Show Customisable Listing Page
-		@RequestMapping(value = "/customisablelist", method = RequestMethod.GET)
-		public ModelAndView customisablelist(HttpSession session) {
-			try {
-				
-			//	ModelAndView modelAndView = new ModelAndView("customisablelist", "litigation", new Litigation());
-				ModelAndView modelAndView = new ModelAndView("customisablelist", "list_litigation",
-						litigationService.getAllListLitigation(session));
-				
-				return modelAndView;
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
-		}	
 
 
 	// Method Created : Mahesh Kharote
@@ -287,16 +297,16 @@ public class LitigationController {
 	// Method Purpose : Save new litigation
 	@RequestMapping(value = "/saveLititgation", method = RequestMethod.POST)
 	public String saveLititgation(Litigation litigation,
-			@RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
-			@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft,
-			@RequestParam(name = "liti_req_id", required = false, defaultValue = "0") int id, HttpSession session,
-			@RequestParam(name = "esc_internal_resource", required = false, defaultValue = "") String esc_internal_resource,
-			@RequestParam(name = "esc_law_firm", required = false, defaultValue = "") String esc_law_firm,
-			@RequestParam(name = "esc_appear_counsel", required = false, defaultValue = "") String esc_appear_counsel,
-			@RequestParam(name = "esc_others", required = false, defaultValue = "") String esc_others,
-			@RequestParam(name = "liti_req_type", required = false, defaultValue = "NA") String type,
-			@RequestParam("litigation_doc") ArrayList<MultipartFile> litigation_doc
-	/* @RequestParam("ldoc_document_type") String ldoc_document_type, */
+								  @RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
+								  @RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft,
+								  @RequestParam(name = "liti_req_id", required = false, defaultValue = "0") int id, HttpSession session,
+								  @RequestParam(name = "esc_internal_resource", required = false, defaultValue = "") String esc_internal_resource,
+								  @RequestParam(name = "esc_law_firm", required = false, defaultValue = "") String esc_law_firm,
+								  @RequestParam(name = "esc_appear_counsel", required = false, defaultValue = "") String esc_appear_counsel,
+								  @RequestParam(name = "esc_others", required = false, defaultValue = "") String esc_others,
+								  @RequestParam(name = "liti_req_type", required = false, defaultValue = "NA") String type,
+								  @RequestParam("litigation_doc") ArrayList<MultipartFile> litigation_doc
+			/* @RequestParam("ldoc_document_type") String ldoc_document_type, */
 	) {
 		try {
 			String status = "";
@@ -323,86 +333,92 @@ public class LitigationController {
 	@RequestMapping(value = "/editLitigation", method = RequestMethod.GET)
 	public ModelAndView editLitigation(int liti_id, HttpSession session) {
 		try {
-			Litigation litigation = litigationService.getLitigationByLitiId(liti_id);
 
-			ModelAndView modelAndView = new ModelAndView("editLitigation", "editLitigation", litigation);
-			// modelAndView.addObject("allOrganizations",
-			// entityMappingService.getOrganizationByUserId(session));
-			modelAndView.addObject("litigation_type_list", litigationService.getAllLitiType());
-			modelAndView.addObject("external_counsel_list", externalCounselService.getAll());
-			int orga = litigation.getLiti_orga_id();
-			int loca = litigation.getLiti_loca_id();
-			int dept = litigation.getLiti_dept_id();
-			/*
-			 * modelAndView.addObject("user_legal_department",
-			 * userService.getUsersByOrganizationLocationDepartment(orga, loca, dept));
-			 * modelAndView.addObject("user_secondary_department",
-			 * userService.getUsersByOrganizationLocationDepartment(orga, loca, dept));
-			 * modelAndView.addObject("user_third_department",userService.
-			 * getUsersByOrganizationLocationDepartment(orga, loca, dept));
-			 * modelAndView.addObject("user_fourth_department",userService.
-			 * getUsersByOrganizationLocationDepartment(orga, loca, dept));
-			 */
-			modelAndView.addObject("allLocations", entityMappingService.getLocationByUserId(session, orga));
-			modelAndView.addObject("allDepartments", entityMappingService.getDeptByUserId(session, loca, orga));
-			modelAndView.addObject("listAdvocate", advocateService.getAll());
-			modelAndView.addObject("liti_code", internalLitigationService.getAll());
-			modelAndView.addObject("allLawFirm", lawFirmService.getAllLawFirm());
-			modelAndView.addObject("allCurrency", currencyService.getAll());
-			modelAndView.addObject("AllCourt", courtService.getAll());
-			modelAndView.addObject("previous_liti_no", litigation.getLiti_previous_liti_ref_no());
-			modelAndView.addObject("criticality", litigation.getLiti_criticality());
-			modelAndView.addObject("allUsers", userService.getAllUser());
-			LitigationEscalationMailId litiMail = litigationService.getEscalationMailByLitiId(liti_id);
+			Integer userRole = (Integer) session.getAttribute("sess_user_role");
+			if (userRole != null && ALLOWED_ROLES.contains(userRole)) {
 
-			if (litiMail != null) {
-				if (!litiMail.getEsc_internal_resource().equals(""))
-					modelAndView.addObject("internal_resource", litiMail.getEsc_internal_resource());
-				else {
-					modelAndView.addObject("internal_resource", "");
+				Litigation litigation = litigationService.getLitigationByLitiId(liti_id);
+
+				ModelAndView modelAndView = new ModelAndView("editLitigation", "editLitigation", litigation);
+				// modelAndView.addObject("allOrganizations",
+				// entityMappingService.getOrganizationByUserId(session));
+				modelAndView.addObject("litigation_type_list", litigationService.getAllLitiType());
+				modelAndView.addObject("external_counsel_list", externalCounselService.getAll());
+				int orga = litigation.getLiti_orga_id();
+				int loca = litigation.getLiti_loca_id();
+				int dept = litigation.getLiti_dept_id();
+				/*
+				 * modelAndView.addObject("user_legal_department",
+				 * userService.getUsersByOrganizationLocationDepartment(orga, loca, dept));
+				 * modelAndView.addObject("user_secondary_department",
+				 * userService.getUsersByOrganizationLocationDepartment(orga, loca, dept));
+				 * modelAndView.addObject("user_third_department",userService.
+				 * getUsersByOrganizationLocationDepartment(orga, loca, dept));
+				 * modelAndView.addObject("user_fourth_department",userService.
+				 * getUsersByOrganizationLocationDepartment(orga, loca, dept));
+				 */
+				modelAndView.addObject("allLocations", entityMappingService.getLocationByUserId(session, orga));
+				modelAndView.addObject("allDepartments", entityMappingService.getDeptByUserId(session, loca, orga));
+				modelAndView.addObject("listAdvocate", advocateService.getAll());
+				modelAndView.addObject("liti_code", internalLitigationService.getAll());
+				modelAndView.addObject("allLawFirm", lawFirmService.getAllLawFirm());
+				modelAndView.addObject("allCurrency", currencyService.getAll());
+				modelAndView.addObject("AllCourt", courtService.getAll());
+				modelAndView.addObject("previous_liti_no", litigation.getLiti_previous_liti_ref_no());
+				modelAndView.addObject("criticality", litigation.getLiti_criticality());
+				modelAndView.addObject("allUsers", userService.getAllUser());
+				LitigationEscalationMailId litiMail = litigationService.getEscalationMailByLitiId(liti_id);
+
+				if (litiMail != null) {
+					if (!litiMail.getEsc_internal_resource().equals(""))
+						modelAndView.addObject("internal_resource", litiMail.getEsc_internal_resource());
+					else {
+						modelAndView.addObject("internal_resource", "");
+					}
+
+					if (!litiMail.getEsc_law_firm().equals("")) {
+						modelAndView.addObject("law_firm", litiMail.getEsc_law_firm());
+					} else {
+						modelAndView.addObject("law_firm", "");
+					}
+					if (!litiMail.getEsc_appear_counsel().equals("")) {
+						modelAndView.addObject("counsel_appear", litiMail.getEsc_appear_counsel());
+					} else {
+						modelAndView.addObject("counsel_appear", "");
+					}
+					if (!litiMail.getEsc_others().equals("")) {
+						modelAndView.addObject("others", litiMail.getEsc_others());
+					} else {
+						modelAndView.addObject("others", "");
+					}
 				}
 
-				if (!litiMail.getEsc_law_firm().equals("")) {
-					modelAndView.addObject("law_firm", litiMail.getEsc_law_firm());
+				Map<Integer, String> acting_as = new HashMap<>();
+
+				if (litigation.getLiti_against_by_id().equals("By")) {
+					acting_as.put(0, "--Select--");
+					acting_as.put(1, "Plaintiff");
+					acting_as.put(2, "Applicant");
+					acting_as.put(3, "Complainant");
+					acting_as.put(4, "Appellant");
+					acting_as.put(5, "Petitioner");
+
 				} else {
-					modelAndView.addObject("law_firm", "");
+					acting_as.put(0, "--Select--");
+					acting_as.put(1, "Defendant");
+					acting_as.put(2, "Opponent");
+					acting_as.put(3, "Opposite_Party");
+					acting_as.put(4, "Repondent");
 				}
-				if (!litiMail.getEsc_appear_counsel().equals("")) {
-					modelAndView.addObject("counsel_appear", litiMail.getEsc_appear_counsel());
-				} else {
-					modelAndView.addObject("counsel_appear", "");
-				}
-				if (!litiMail.getEsc_others().equals("")) {
-					modelAndView.addObject("others", litiMail.getEsc_others());
-				} else {
-					modelAndView.addObject("others", "");
-				}
+				modelAndView.addObject("acting_as", acting_as);
+				modelAndView.addObject("status", litigation.getLiti_status());
+				return modelAndView;
 			}
-
-			Map<Integer, String> acting_as = new HashMap<>();
-
-			if (litigation.getLiti_against_by_id().equals("By")) {
-				acting_as.put(0, "--Select--");
-				acting_as.put(1, "Plaintiff");
-				acting_as.put(2, "Applicant");
-				acting_as.put(3, "Complainant");
-				acting_as.put(4, "Appellant");
-				acting_as.put(5, "Petitioner");
-
-			} else {
-				acting_as.put(0, "--Select--");
-				acting_as.put(1, "Defendant");
-				acting_as.put(2, "Opponent");
-				acting_as.put(3, "Opposite_Party");
-				acting_as.put(4, "Repondent");
-			}
-			modelAndView.addObject("acting_as", acting_as);
-			modelAndView.addObject("status", litigation.getLiti_status());
-			return modelAndView;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
+		return null;
 	}
 
 	// Method Created : Mahesh Kharote
@@ -419,14 +435,14 @@ public class LitigationController {
 			modelAndView.addObject("allCourt", courtService.getAll());
 			modelAndView.addObject("CounselFeesDetails", litigationService.getCounselFeesByLitiId(liti_id));
 			modelAndView.addObject("AdvocateFeesDetails", litigationService.getAdvocateFeesDetailsByLitiId(liti_id));
-			
+
 			if (!details.getLiti_previous_liti_ref_no().equals("NA"))
 				modelAndView.addObject("previous_liti_client_id",litigationService.getpreviouslitiId(details.getLiti_previous_liti_ref_no()));
-			
+
 			modelAndView.addObject("allDocuments", litigationService.getAllDocumentByLitiId(liti_id));
-			
+
 			modelAndView.addObject("completionDocuments", litigationService.getCompletionDocumentByLitiId(liti_id));
-			
+
 			return modelAndView;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -438,8 +454,8 @@ public class LitigationController {
 	// Method Purpose : Save Document to drive and add entry to database
 	@RequestMapping(value = "/addLitigationDocument", method = RequestMethod.POST)
 	public @ResponseBody int addLitigationDocument(@RequestParam("litigationDocument") MultipartFile litigationDocument,
-			@RequestParam("ldoc_document_type") String ldoc_document_type,
-			@RequestParam("ldoc_liti_id") int ldoc_liti_id) {
+												   @RequestParam("ldoc_document_type") String ldoc_document_type,
+												   @RequestParam("ldoc_liti_id") int ldoc_liti_id) {
 		try {
 			litigationService.addLitigationDocument(ldoc_liti_id, ldoc_document_type, litigationDocument);
 			return ldoc_liti_id;
@@ -526,9 +542,9 @@ public class LitigationController {
 			int loca = litigation.getLiti_loca_id();
 			int dept = litigation.getLiti_dept_id();
 			modelAndView.addObject("user_list", userService.getUsersByOrganizationLocationDepartment(orga, loca, dept));
-			
+
 			modelAndView.addObject("user_lists",userService.getUsersByOrganizationLocationDepartment(orga, loca, dept));
-			 
+
 			modelAndView.addObject("listStages", stagesService.getAll());
 			modelAndView.addObject("allLawFirm", lawFirmService.getAllLawFirm());
 			/// modelAndView.addObject("external_counsel_list",
@@ -544,10 +560,10 @@ public class LitigationController {
 	// Method Purpose : Save hearing stage
 	@RequestMapping(value = "/saveHearingStage", method = RequestMethod.POST)
 	public String saveHearingStage(HearingStage hearingStage,
-			@RequestParam("stage_document") ArrayList<MultipartFile> hearing_doc,
-			@RequestParam(name = "counsel_list", required = false) ArrayList<String> ttrn_counsel_list,
-			@RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
-			@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft) {
+								   @RequestParam("stage_document") ArrayList<MultipartFile> hearing_doc,
+								   @RequestParam(name = "counsel_list", required = false) ArrayList<String> ttrn_counsel_list,
+								   @RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
+								   @RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft) {
 		try {
 			String status = "";
 			if (save.equals("Save")) {
@@ -610,10 +626,10 @@ public class LitigationController {
 	// Method Purpose : Save hearing stage
 	@RequestMapping(value = "/updateHearingStage", method = RequestMethod.POST)
 	public String updateHearingStage(HearingStage hearingStage,
-			@RequestParam("stage_document") ArrayList<MultipartFile> hearing_doc,
-			@RequestParam(name = "counsel_list", required = false) ArrayList<String> ttrn_counsel_list,
-			@RequestParam(value = "Update", required = false, defaultValue = "d_save") String update,
-			@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft) {
+									 @RequestParam("stage_document") ArrayList<MultipartFile> hearing_doc,
+									 @RequestParam(name = "counsel_list", required = false) ArrayList<String> ttrn_counsel_list,
+									 @RequestParam(value = "Update", required = false, defaultValue = "d_save") String update,
+									 @RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft) {
 		try {
 			String status = "";
 			if (update.equals("Update")) {
@@ -634,13 +650,13 @@ public class LitigationController {
 	// Method Purpose : Update litigation
 	@RequestMapping(value = "/updateLitigation", method = RequestMethod.POST)
 	public String updateLitigation(Litigation litigation,
-			@RequestParam(value = "Update", required = false, defaultValue = "d_save") String save,
-			@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft,
-			HttpSession session,
-			@RequestParam(name = "esc_internal_resource", required = false, defaultValue = "") String esc_internal_resource,
-			@RequestParam(name = "esc_law_firm", required = false, defaultValue = "") String esc_law_firm,
-			@RequestParam(name = "esc_appear_counsel", required = false, defaultValue = "") String esc_appear_counsel,
-			@RequestParam(name = "esc_others", required = false, defaultValue = "") String esc_others) {
+								   @RequestParam(value = "Update", required = false, defaultValue = "d_save") String save,
+								   @RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft,
+								   HttpSession session,
+								   @RequestParam(name = "esc_internal_resource", required = false, defaultValue = "") String esc_internal_resource,
+								   @RequestParam(name = "esc_law_firm", required = false, defaultValue = "") String esc_law_firm,
+								   @RequestParam(name = "esc_appear_counsel", required = false, defaultValue = "") String esc_appear_counsel,
+								   @RequestParam(name = "esc_others", required = false, defaultValue = "") String esc_others) {
 		try {
 			String status = "";
 			if (save.equals("Update")) {
@@ -670,9 +686,9 @@ public class LitigationController {
 		return json;
 
 	}
-	
-	
-	
+
+
+
 
 	// Method Created : Harshad Padole
 	// Method Purpose : Download hearing document
@@ -689,7 +705,7 @@ public class LitigationController {
 	// Method Purpose : Save litigation completion details
 	@RequestMapping(value = "/saveLitiCompletion", method = RequestMethod.POST)
 	public String saveLitiCompletion(Litigation litigation,
-			@RequestParam("completion_documents") ArrayList<MultipartFile> completion_documents) {
+									 @RequestParam("completion_documents") ArrayList<MultipartFile> completion_documents) {
 		try {
 			// System.out.println(":hii");
 			litigationService.saveLitigationCompletion(litigation, completion_documents);
@@ -704,7 +720,7 @@ public class LitigationController {
 	// Method Purpose : Save litigation completion details
 	@RequestMapping(value = "/saveCounselFees", method = RequestMethod.POST)
 	public String saveCounselFees(LitigationCounselFees fees,
-			@RequestParam("counsel_agreed_doc") ArrayList<MultipartFile> counsel_agreed_doc) {
+								  @RequestParam("counsel_agreed_doc") ArrayList<MultipartFile> counsel_agreed_doc) {
 		try {
 			litigationService.saveCounselFees(fees, counsel_agreed_doc);
 			return "redirect:litigationDetails?liti_id=" + fees.getLcou_liti_id();
@@ -754,7 +770,7 @@ public class LitigationController {
 	// Method Purpose : Save litigation completion details
 	@RequestMapping(value = "/saveAdvocateFees", method = RequestMethod.POST)
 	public String saveAdvocateFees(LitigationAdvocateFees fees,
-			@RequestParam("advocate_agreed_doc") ArrayList<MultipartFile> advocate_agreed_doc) {
+								   @RequestParam("advocate_agreed_doc") ArrayList<MultipartFile> advocate_agreed_doc) {
 		try {
 			litigationService.saveAdvocateFees(fees, advocate_agreed_doc);
 			return "redirect:litigationDetails?liti_id=" + fees.getLadv_litigation_id();
@@ -766,11 +782,11 @@ public class LitigationController {
 
 	// Method Created : Harshad Padole
 	// Method Purpose : edit counsel fees details
-	
+
 	@RequestMapping(value = "/editCounselFees", method = RequestMethod.GET)
 	public ModelAndView editCounselFees(int lcou_id) {
 		try {
-			
+
 			LitigationCounselFees counselFees = litigationService.getCounselFeesDetailsById(lcou_id);
 			ModelAndView modelAndView = new ModelAndView("editCounselFees", "editCounselFees", counselFees);
 			modelAndView.addObject("litigationDetails",
@@ -791,7 +807,7 @@ public class LitigationController {
 	// Method Purpose : Update counsel fees details
 	@RequestMapping(value = "/updateCounselFees", method = RequestMethod.POST)
 	public String updateCounselFees(LitigationCounselFees counselFees,
-			@RequestParam("counsel_agreed_doc") ArrayList<MultipartFile> counsel_agreed_doc) {
+									@RequestParam("counsel_agreed_doc") ArrayList<MultipartFile> counsel_agreed_doc) {
 		try {
 			litigationService.updateCounselFees(counselFees, counsel_agreed_doc);
 			return "redirect:litigationDetails?liti_id=" + counselFees.getLcou_liti_id();
@@ -826,7 +842,7 @@ public class LitigationController {
 	// Method Purpose : Update advocate fees details
 	@RequestMapping(value = "/updateAdvocateFees", method = RequestMethod.POST)
 	public String updateAdvocateFees(LitigationAdvocateFees advocateFees,
-			@RequestParam("advocate_agreed_doc") ArrayList<MultipartFile> advocate_agreed_doc) {
+									 @RequestParam("advocate_agreed_doc") ArrayList<MultipartFile> advocate_agreed_doc) {
 		try {
 			litigationService.updateAdvocateFees(advocateFees, advocate_agreed_doc);
 			return "redirect:litigationDetails?liti_id=" + advocateFees.getLadv_litigation_id();
@@ -871,7 +887,7 @@ public class LitigationController {
 	// Method Purpose : Save paid counsel fees
 	@RequestMapping(value = "/savePaidCounselFees", method = RequestMethod.POST)
 	public String savePaidCounselFees(CounselPaidFees fees,
-			@RequestParam("counsel_paid_doc") ArrayList<MultipartFile> counsel_paid_doc) {
+									  @RequestParam("counsel_paid_doc") ArrayList<MultipartFile> counsel_paid_doc) {
 		try {
 
 			litigationService.savePaidCounselFees(fees, counsel_paid_doc);
@@ -916,7 +932,7 @@ public class LitigationController {
 	// Method Purpose : Save paid advocate fees
 	@RequestMapping(value = "/savePaidAdvocateFees", method = RequestMethod.POST)
 	public String savePaidAdvocateFees(AdvocatePaidFees fees,
-			@RequestParam("advocate_paid_doc") ArrayList<MultipartFile> advocate_paid_doc) {
+									   @RequestParam("advocate_paid_doc") ArrayList<MultipartFile> advocate_paid_doc) {
 		try {
 			litigationService.savePaidAdvocateFees(fees, advocate_paid_doc);
 			return "redirect:listPaidAdvocateFees?advocate_fees_id=" + fees.getApaid_advocate_fees_id();
@@ -947,7 +963,7 @@ public class LitigationController {
 	// Method Purpose : Update Paid Advocate fees
 	@RequestMapping(value = "/updatePaidAdvocateFees", method = RequestMethod.POST)
 	public String updatePaidAdvocateFees(AdvocatePaidFees advocatePaidFees,
-			@RequestParam("advocate_paid_doc") ArrayList<MultipartFile> advocate_paid_doc) {
+										 @RequestParam("advocate_paid_doc") ArrayList<MultipartFile> advocate_paid_doc) {
 		try {
 			litigationService.updatePaidAdvocateFees(advocatePaidFees, advocate_paid_doc);
 			return "redirect:listPaidAdvocateFees?advocate_fees_id=" + advocatePaidFees.getApaid_advocate_fees_id();
@@ -978,7 +994,7 @@ public class LitigationController {
 	// Method Purpose : Update Paid Advocate fees
 	@RequestMapping(value = "/updatePaidCounselFees", method = RequestMethod.POST)
 	public String updatePaidCounselFees(CounselPaidFees paidFees,
-			@RequestParam("counsel_paid_doc") ArrayList<MultipartFile> counsel_paid_doc) {
+										@RequestParam("counsel_paid_doc") ArrayList<MultipartFile> counsel_paid_doc) {
 		try {
 			litigationService.updatePaidCounselFees(paidFees, counsel_paid_doc);
 			return "redirect:listPaidCounselFees?counsel_fees_id=" + paidFees.getCpaid_counsel_fees_id();
@@ -1171,9 +1187,9 @@ public class LitigationController {
 
 	@RequestMapping(value = "/saveHearingStageOnHearing", method = RequestMethod.POST)
 	public String saveHearingStageOnHearing(HearingStage hearingStage,
-			@RequestParam("stage_document") ArrayList<MultipartFile> hearing_doc,
-			@RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
-			@RequestParam(name = "hearing_id", required = false, defaultValue = "0") String hearing_id) {
+											@RequestParam("stage_document") ArrayList<MultipartFile> hearing_doc,
+											@RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
+											@RequestParam(name = "hearing_id", required = false, defaultValue = "0") String hearing_id) {
 		try {
 			String status = "";
 			if (save.equals("Save")) {
@@ -1224,82 +1240,82 @@ public class LitigationController {
 	/*---------------------------------------Code For Litigation Ends Here---------------------------------------------------*/
 	/*-------------------------------------------Start ACM Report-----------------------------------------------------------------------------*/
 
-	  
-// Method Created : Akshay Patkar
+
+	// Method Created : Akshay Patkar
 // Method Purpose : Export ACM Report
-		@RequestMapping(value = "/ExportList", method = RequestMethod.POST)
-		public @ResponseBody String ExportList(@RequestBody String json,HttpSession session, HttpServletRequest request)
-		{
-			try {
-			
-				String result =litigationService.acmLitigation(json,session);
+	@RequestMapping(value = "/ExportList", method = RequestMethod.POST)
+	public @ResponseBody String ExportList(@RequestBody String json,HttpSession session, HttpServletRequest request)
+	{
+		try {
+
+			String result =litigationService.acmLitigation(json,session);
 			return result;
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-		
-		
-		@RequestMapping(value = "/downloadACMReport" , method = RequestMethod.GET)
-		public @ResponseBody void ExportList1(HttpServletResponse response){
-			
-			try {
-				
-			 litigationService.downloadACMReport(response);
-		
-		
-			} catch (Exception e) {
-				e.printStackTrace();
-				
-			}
-		}
-		/*------------------------------------------------------------End ACM------------------------------------------------------*/
 
-		
-		// Method Created : Akash Jadhav
-		// Method Purpose : edit Completion details
-		@RequestMapping(value = "/editCompletion", method = RequestMethod.GET)
-		public ModelAndView editCompletion(int liti_id) {
-			try {
-				Litigation litigation = litigationService.getCompletionDetailsById(liti_id);
-				ModelAndView modelAndView = new ModelAndView("editCompletion", "editCompletion", litigation);
-				modelAndView.addObject("allCourt", courtService.getAll());
-				return modelAndView;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
-		
-		// Method Created : Akash Jadhav
-		// Method purpose : update Completion
-
-		@RequestMapping(value = "/updateCompletion", method = RequestMethod.POST)
-		public String updateCompletion(Litigation completion, HttpSession session,
-				@RequestParam("edit_completion_documents") ArrayList<MultipartFile> edit_completion_documents) {
-			try {
-				int liti_id =  litigationService.updateCompletion(completion,edit_completion_documents, session);
-				return "redirect:litigationDetails?liti_id=" + completion.getLiti_id();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-	
-		
-		// Method Created : Akash Jadhav
-		// Method purpose : download Completion documents
-		@RequestMapping(value = "/downloadcompletionDoc", method = RequestMethod.GET)
-		public void downloadcompletionDoc(int comp_doc_id, HttpServletResponse response) {
-			try {
-				litigationService.downloadcompletionDoc(comp_doc_id, response);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		}	
-		
-		
 	}
+
+
+	@RequestMapping(value = "/downloadACMReport" , method = RequestMethod.GET)
+	public @ResponseBody void ExportList1(HttpServletResponse response){
+
+		try {
+
+			litigationService.downloadACMReport(response);
+
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+	}
+	/*------------------------------------------------------------End ACM------------------------------------------------------*/
+
+
+	// Method Created : Akash Jadhav
+	// Method Purpose : edit Completion details
+	@RequestMapping(value = "/editCompletion", method = RequestMethod.GET)
+	public ModelAndView editCompletion(int liti_id) {
+		try {
+			Litigation litigation = litigationService.getCompletionDetailsById(liti_id);
+			ModelAndView modelAndView = new ModelAndView("editCompletion", "editCompletion", litigation);
+			modelAndView.addObject("allCourt", courtService.getAll());
+			return modelAndView;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	// Method Created : Akash Jadhav
+	// Method purpose : update Completion
+
+	@RequestMapping(value = "/updateCompletion", method = RequestMethod.POST)
+	public String updateCompletion(Litigation completion, HttpSession session,
+								   @RequestParam("edit_completion_documents") ArrayList<MultipartFile> edit_completion_documents) {
+		try {
+			int liti_id =  litigationService.updateCompletion(completion,edit_completion_documents, session);
+			return "redirect:litigationDetails?liti_id=" + completion.getLiti_id();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+	// Method Created : Akash Jadhav
+	// Method purpose : download Completion documents
+	@RequestMapping(value = "/downloadcompletionDoc", method = RequestMethod.GET)
+	public void downloadcompletionDoc(int comp_doc_id, HttpServletResponse response) {
+		try {
+			litigationService.downloadcompletionDoc(comp_doc_id, response);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+
+}

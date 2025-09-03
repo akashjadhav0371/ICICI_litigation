@@ -1,6 +1,9 @@
+<%@ page import="lcmt.util.KeyUtil" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="sf"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
@@ -17,6 +20,7 @@
 <!-- IE Compatible  -->
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsencrypt/bin/jsencrypt.min.js"></script>
 
 <link rel="stylesheet" href="css/dataTables.bootstrap.min.css"> 
 <link rel="stylesheet" href="css/style.css">
@@ -67,6 +71,22 @@
 							<div class="modal-body">
 								<p>Incorrect Password...!</p>
 							</div>
+							
+						<c:choose>
+						  <c:when test="${not empty sessionScope.login_fail_count and sessionScope.login_fail_count > 1}">
+						    <div class="form-group">
+						      <div class="col-md-12">
+						        <center>
+						          <p>Login Failed Count: ${sessionScope.login_fail_count}</p>
+						        </center>
+						      </div>
+						    </div>
+						  </c:when>
+						  <c:otherwise>
+						    <!-- Optionally display a default message or nothing -->
+						  </c:otherwise>
+						</c:choose>
+													
 							<div class="modal-footer">
 								<button type="button" class="btn btn-default"
 									data-dismiss="modal">Close</button>
@@ -204,9 +224,32 @@
 			});
 		});
 		
+	/* 	async function getPubKey() {
+			const pubKey = await fetch("./publicKey").then(res => res.text());
+			alert(' pubKey @@'+pubKey);
+			return pubKey;
+		}
+		 */
 		function validateForm(){
 			var user_username 		= $("#user_username").val();
 			var user_userpassword 	= $("#user_userpassword").val();
+			
+			  // Fetch public key from server
+			 // const pubKey = getPubKey();
+			  
+			  const pubKey = '<%= KeyUtil.getPublicKey() %>';
+
+			//  alert('@@@@pubKey ='+pubKey);
+			  
+			//  alert('@@@@user_userpassword ='+user_userpassword);
+			  // Encrypt password;
+			  const jsEncrypt = new JSEncrypt();
+			  jsEncrypt.setPublicKey(pubKey);
+			  const encryptedPassword = jsEncrypt.encrypt(user_userpassword);
+			//  alert('@###encryptedPassword ='+encryptedPassword);
+			  
+			  document.getElementById("user_userpassword").value = encryptedPassword
+			
 			var remember_me         = document.getElementById("remember_me").checked;
 			if (user_username == 0) {
 	        	 
@@ -233,23 +276,24 @@
 	         	$('#user_userpassword').popover('destroy');
 	        }
 			if(remember_me==true){
-				    var d = new Date();
+				    /* var d = new Date();
 				    d.setTime(d.getTime() + (30  24  60  60  1000));
 				    var expires = "expires="+d.toUTCString();
 				    document.cookie = "username="+user_username+"; path=/"; 
-				    document.cookie = "password="+user_userpassword+"; path=/";
+				    document.cookie = "password="+user_userpassword+"; path=/"; */
 				    
 				
 			}else{
-				document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-				document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+				/* document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+				document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; */
 				
 			}
+			//alert("end");
 			return true;
 		}
 		
 		function checkCookie() {
-		    var username = getCookie("username");
+		   /*  var username = getCookie("username");
 		    var password = getCookie("password");
 		    if (username != "") {
 		    	$("#user_username").val(username);
@@ -258,7 +302,7 @@
 		    } else {
 		    	document.getElementById("remember_me").checked = false;
 		        //alert("No Cookies");
-		    }
+		    } */
 		}
 		
 		function getCookie(cname) {

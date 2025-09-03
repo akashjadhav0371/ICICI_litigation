@@ -294,7 +294,7 @@
 											</label>
 										<div class="col-sm-6">
 											<sf:input path="sarf_total_amount" id="sarf_total_amount" Class="form-control" 
-												placeholder="Enter Total Amount" type="number" />
+												placeholder="Enter Total Amount" maxlength="30" type="number" />
 											 <i class="asterisk_input"></i> 
 
 										</div>
@@ -307,7 +307,7 @@
 											</label>
 										<div class="col-sm-6">
 											<sf:input path="sarf_loan_repay_amount" id="sarf_loan_repay_amount" Class="form-control" 
-												placeholder="Enter Loan Repayment Amount" type="number" />
+												placeholder="Enter Loan Repayment Amount" maxlength="30" type="number" />
 											 <i class="asterisk_input"></i> 
 
 										</div>
@@ -319,7 +319,7 @@
 										<label class="control-label col-sm-4" for="sel1"> Amount Paid:
 											 </label>
 										<div class="col-sm-6">
-											<sf:input path="sarf_paid_amount" id="sarf_paid_amount" Class="form-control" 
+											<sf:input path="sarf_paid_amount" id="sarf_paid_amount" maxlength="30" Class="form-control" 
 												placeholder="Enter Paid Amount" type="number"/>
 											 <!-- <i class="asterisk_input"></i>  -->
 
@@ -333,7 +333,7 @@
 											 </label>
 										<div class="col-sm-6">
 											<sf:input path="sarf_balance_amount" id="sarf_balance_amount" Class="form-control" 
-												placeholder="Enter Balance Amount" type="number"/>
+												placeholder="Enter Balance Amount" maxlength="30" type="number"/>
 											 <!-- <i class="asterisk_input"></i>  -->
 
 										</div>

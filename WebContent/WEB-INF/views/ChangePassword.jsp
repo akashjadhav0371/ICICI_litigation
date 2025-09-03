@@ -1,6 +1,8 @@
 	<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
+<%@ page import="lcmt.util.KeyUtil" %>	
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<script src="https://cdn.jsdelivr.net/npm/jsencrypt/bin/jsencrypt.min.js"></script>
 
 <jsp:include page="/WEB-INF/views/header.jsp"></jsp:include>
 
@@ -74,6 +76,7 @@
 		var opwd=$("#oldPassword").val();
 		var cpwd=$("#confPassword").val();
 		var npwd=$('#newPassword').val();
+		var isValidOldPwd = false;
 		
 		//Remove white spaces
 		if(opwd.length > $("#oldPassword").val().length){
@@ -112,33 +115,38 @@
 	           else
 	           {
 	        	   $.ajax({
-	   				type : "POST",
-	   				url : "./getOriginalPassword",
-	   				contentType : "application/json",
-	   				dataType : "html",
-	   				cache : false,
-	   				success : function(res) {
-	   					var originalOldPass;
-	   					originalOldPass = res;
-	   					if (opwd != originalOldPass) {
-	   						
-	   						 $("#oldPassword" ).attr( "data-placement", "top" );
-	   				         $("#oldPassword" ).attr( "data-content", "Old Password is not Correct..!" );
-	   				         $('#oldPassword').popover('show');
-	   						 $("#oldPassword").val("");
-	   						 $("#oldPassword").focus();
-	   						$('#newPassword').popover('destroy');
-	   						 return false;
-	   					}else{
-	   						$("#newPassword").focus();
-	   						$('#oldPassword').popover('destroy');
-	   						
-	   					}
-	   				}
-	   			});
-	           	
+	        		    type: "POST",
+	        		    url: "./getOriginalPassword",
+	        		    contentType: "application/json",
+	        		    dataType: "text", // Changed from "html" to "text"
+	        		    cache: false,
+	        		    async: false, 
+	        		    success: function(res) {
+	        		        var originalOldPass = res;
+	        		        if (opwd !== originalOldPass) {
+	        		            $("#oldPassword").attr("data-placement", "top");
+	        		            $("#oldPassword").attr("data-content", "Old Password is not Correct..!");
+	        		            // Initialize popover before showing
+	        		            $('#oldPassword').popover({ trigger: 'manual' }).popover('show');
+	        		            $("#oldPassword").val("").focus();
+	        		            $('#newPassword').popover('destroy');
+	        		            isValidOldPwd = false;
+	        		            return false;
+	        		        } else {
+	        		            $('#oldPassword').popover('destroy');
+	        		            $("#newPassword").focus();
+	        		            isValidOldPwd = true;
+	        		        }
+	        		    },
+	        		    error: function(xhr, status, error) {
+	        		        console.error("AJAX error: " + status + " - " + error);
+	        		        alert("Failed to verify old password. Please try again.");
+	        		    }
+	        		});
 	           }
 		
+		
+		if(!isValidOldPwd) return false;
 				/////////////Confirm Password ///////// 
 		if (npwd == "") {
 	       	 
@@ -196,6 +204,16 @@
 					
 					}
 				
+				  const pubKey = '<%= KeyUtil.getPublicKey() %>';
+				
+				  var confPassword 	= $("#confPassword").val();
+			
+				  const jsEncrypt = new JSEncrypt();
+				  jsEncrypt.setPublicKey(pubKey);
+				  const encryptedPassword = jsEncrypt.encrypt(confPassword);
+				  $("#oldPassword").val("");
+				  $("#confPassword").val(encryptedPassword);
+				  $("#newPassword").val(encryptedPassword);
 					
 	       //return true;
 	}

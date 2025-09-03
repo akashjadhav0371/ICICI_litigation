@@ -892,7 +892,7 @@
 										Involved: </label>
 									<div class="col-sm-6">
 										<sf:input path="liti_amount_involved" cssClass="form-control"
-											placeholder="Enter Amount" />
+											placeholder="Enter Amount" maxlength="30"/>
 										<i class="asterisk_input"></i>
 									</div>
 								</div>
@@ -903,7 +903,7 @@
 										: </label>
 									<div class="col-sm-6">
 										<sf:input path="liti_interest" cssClass="form-control"
-											placeholder="Enter Interest" />
+											placeholder="Enter Interest" maxlength="30" />
 									</div>
 								</div>
 							</div>

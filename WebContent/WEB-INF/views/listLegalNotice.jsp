@@ -26,6 +26,10 @@
 </div>
 <!-- Fail Modal END -->
 
+<c:choose>
+				<c:when
+						test="${sessionScope.sess_user_role==1 || sessionScope.sess_user_role==5 || sessionScope.sess_user_role==7 || sessionScope.sess_user_role==8 || sessionScope.sess_user_role==9}">
+						
 
 <div class="page_container">
 	<!--heading text-->
@@ -231,6 +235,7 @@
 		</div>
 	</div>
 
+
 	<div style="clear: both"></div>
 
 	<div class="table_data1">
@@ -332,6 +337,18 @@
 
 	</div>
 </div>
+</c:when>
+<c:otherwise>
+<div class="page_container">
+
+     <div class="table_data1">
+        <center>
+          <p> <h2>Not allowed to view this page</h2> </p>
+        </center>
+      </div>
+   </div>    
+  </c:otherwise>
+</c:choose>
 
 <script type="text/javascript">
 	$(document)

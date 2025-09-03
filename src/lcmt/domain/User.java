@@ -11,8 +11,8 @@ import javax.persistence.Id;
  * Author : Rahul Shinde
  * Created Date : 19/02/2016
  * Updated By :
- * Updated Date : 
- *  
+ * Updated Date :
+ *
  * */
 
 @Entity(name = "mst_user")
@@ -38,10 +38,11 @@ public class User {
 	private String user_enable_status;
 	private String user_approval_status;
 	private int user_added_by;
+	private Integer user_login_fail_count;
 	private Date user_created_at;
 	private String profile_pic;
 	private String user_default_password_changed;
-	
+
 	public int getUser_id() {
 		return user_id;
 	}
@@ -168,6 +169,12 @@ public class User {
 	public void setUser_default_password_changed(String user_default_password_changed) {
 		this.user_default_password_changed = user_default_password_changed;
 	}
-	
-	
+	public Integer getUser_login_fail_count() {
+		return user_login_fail_count;
+	}
+	public void setUser_login_fail_count(Integer user_login_fail_count) {
+		this.user_login_fail_count = user_login_fail_count;
+	}
+
+
 }

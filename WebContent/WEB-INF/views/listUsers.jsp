@@ -18,9 +18,17 @@
 				</div>
 				</div>
 				<div class="col-md-3">
+		<c:choose>
+        <c:when
+			test="${sessionScope.sess_user_role==1 || sessionScope.sess_user_role==5 || sessionScope.sess_user_role==9 || sessionScope.sess_user_role==10}"> 
 				<a href="./setAccessLevel" class="btn btn-primary">Set access level</a>
 				&nbsp;
 				<a href="./addUser" class="btn btn-primary">Add User</a>
+				</c:when>
+            <c:otherwise>
+   &nbsp;
+    </c:otherwise>
+</c:choose>
 				</div>
 			</div>
 			
@@ -34,7 +42,9 @@
 		<div class="container">
 		
 
-			
+		  <c:choose>
+        <c:when
+			test="${sessionScope.sess_user_role==1 || sessionScope.sess_user_role==5 || sessionScope.sess_user_role==9 || sessionScope.sess_user_role==10}"> 	
 			<table id="example" class="table table-striped table-bordered" width="100%" cellspacing="0">
         <thead>
             	<tr style="background:#a72f14;color:#fff;">
@@ -50,6 +60,7 @@
         </thead>
        
         <tbody>
+      
           <c:forEach items="${allUsers}" var="user">
 					<tr>
 						<td>${user.user_first_name}</td>
@@ -90,10 +101,14 @@
 						</c:choose>
 					</tr>
 				</c:forEach>
-           
+          
         </tbody>
     </table>
-
+ </c:when>
+            <c:otherwise>
+        <tr> <td> Only Admin Role can view the user list </td></tr>
+    </c:otherwise>
+</c:choose>
 				
 				
 			</div>

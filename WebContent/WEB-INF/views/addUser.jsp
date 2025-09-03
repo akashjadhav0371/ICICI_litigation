@@ -21,6 +21,8 @@
 	</div>
 	<div style="clear: both"></div>
 	<!--first form-->
+	<c:choose>
+        <c:when test="${sessionScope.sess_user_role==1 || sessionScope.sess_user_role==5 || sessionScope.sess_user_role==9 || sessionScope.sess_user_role==10}"> 
 	<sf:form class="form-horizontal" commandName="user" autocomplete="off"
 		role="form" onsubmit="return validateForm();" id="addUserForm"
 		action="./saveUser" method="post">
@@ -209,6 +211,12 @@
 			</div>
 		</div>
 	</sf:form>
+	
+	</c:when>
+            <c:otherwise>
+   &nbsp;
+    </c:otherwise>
+</c:choose>
 
 	<div style="clear: both"></div>
 

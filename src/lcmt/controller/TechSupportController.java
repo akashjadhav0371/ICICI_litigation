@@ -83,7 +83,7 @@ public class TechSupportController {
 				
 				utilitiesService.addMailToLog(Cemail, "Query raised from tool");
 				
-				System.out.println("Done");
+				//System.out.println("Done");
 				return "redirect:techSupport";
 			} 
 

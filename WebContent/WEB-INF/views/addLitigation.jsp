@@ -912,7 +912,7 @@
 									<label class="control-label col-sm-4" for="sel1">Amount
 										Involved: </label>
 									<div class="col-sm-6">
-										<sf:input path="liti_amount_involved" cssClass="form-control"
+										<sf:input path="liti_amount_involved" maxlength="30" cssClass="form-control"
 											placeholder="Enter Amount" />
 										<i class="asterisk_input"></i>
 									</div>
@@ -923,7 +923,7 @@
 									<label class="control-label col-sm-4" for="sel1">Interest:
 									</label>
 									<div class="col-sm-6">
-										<sf:input path="liti_interest" cssClass="form-control"
+										<sf:input path="liti_interest" maxlength="30" cssClass="form-control"
 											placeholder="Enter Interest" />
 									</div>
 								</div>
@@ -1212,6 +1212,7 @@
 										});
 					});
 </script>
+<script src="appJs/common/utils.js"></script>
 <script src="appJs/Litigation/litigation.js"></script>
 <jsp:include page="/WEB-INF/views/footer.jsp"></jsp:include>
 

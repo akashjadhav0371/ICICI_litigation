@@ -418,7 +418,7 @@ public class RequestByPOCController {
 	@RequestMapping(value = "/addLitigationByAccept", method = RequestMethod.GET)
 	public ModelAndView addLitigationByAccept(int id, String type, HttpSession session) {
 		try {
-			System.out.println("AcceptByID:"+id);
+			//System.out.println("AcceptByID:"+id);
 			/************** after accepting litigation request ***************/
 			if(type.equals("liti")){
 			//SimpleDateFormat sdfIn = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

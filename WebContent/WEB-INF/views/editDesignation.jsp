@@ -53,7 +53,7 @@
 						<div class="form-group">
 							<label class="control-label col-sm-4" for="sel1">Designation:</label>
 							<div class="col-sm-8">
-								<sf:input path="desi_name" cssClass="form-control" /><i class="asterisk_input"></i>
+								<sf:input path="desi_name" cssClass="form-control" maxlength="150" /><i class="asterisk_input"></i>
 								<sf:errors path="desi_name" cssClass="errorBlock"></sf:errors>
 							</div>
 						</div>
@@ -180,8 +180,13 @@ $('#designation').on('keyup keypress', function(e) {
                  {
                  	$('#desi_name').popover('destroy');
                  }
+             
+             if (!validateAndShowPopover("#desi_name") ) {
+         		    return false;
+         		}
          } 
     	  
        </script>
-
+       
+<script src="appJs/common/utils.js"></script>
 <jsp:include page="/WEB-INF/views/footer.jsp"></jsp:include>

@@ -154,6 +154,8 @@ $(document).ready(function () {
 				</div>
 			</div>
 
+<c:choose>
+<c:when test="${sessionScope.sess_user_role != 0}">
 
 	<div class="page_container">
 		<div class="container">
@@ -276,6 +278,11 @@ $(document).ready(function () {
 			</div>
 		</div>
 	</div>
+
+</c:when>
+		<c:otherwise>
+		</c:otherwise>
+	</c:choose> 
 
 	<script type="text/javascript">
 	

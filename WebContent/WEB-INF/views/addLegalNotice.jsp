@@ -393,7 +393,7 @@
 									<label class="control-label col-sm-4" for="sel1">Amount
 										Involved: </label>
 									<div class="col-sm-6">
-										<sf:input path="lega_noti_amount_involved"
+										<sf:input path="lega_noti_amount_involved" maxlength="30"
 											cssClass="form-control" placeholder="Enter Amount" />
 										<!-- <i class="asterisk_input"></i> -->
 
@@ -406,7 +406,7 @@
 									<label class="control-label col-sm-4" for="sel1">Interest
 										: </label>
 									<div class="col-sm-6">
-										<sf:input path="lega_noti_interest" cssClass="form-control"
+										<sf:input path="lega_noti_interest" maxlength="30" cssClass="form-control"
 											placeholder="Enter Interest" />
 										<!-- <i class="asterisk_input"></i> -->
 

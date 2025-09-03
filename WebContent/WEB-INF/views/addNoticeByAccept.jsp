@@ -238,7 +238,7 @@
 										<label class="control-label col-sm-4" for="sel1">Amount
 											Involved: </label>
 										<div class="col-sm-6">
-											<sf:input path="lega_noti_amount_involved" cssClass="form-control" 
+											<sf:input path="lega_noti_amount_involved" maxlength="30" cssClass="form-control" 
 												placeholder="Enter Amount" />
 											<!-- <i class="asterisk_input"></i> -->
 
@@ -468,6 +468,7 @@ $(document).ready(function(){
 
 </script>
 
+<script src="appJs/common/utils.js"></script>
 <script src="appJs/LegalNotice/LegalNotice.js"></script>
 <script src="appJs/Currency/money.js"></script>
 <script src="appJs/Currency/money.min.js"></script>

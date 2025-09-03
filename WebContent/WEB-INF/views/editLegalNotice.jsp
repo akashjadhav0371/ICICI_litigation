@@ -121,6 +121,7 @@
 								<i class="asterisk_input"></i>
 							</div>
 						</div>
+						
 						<div class="form-group">
 							<label class="control-label col-sm-5" for="sel1">
 								Opposite Party :</label>
@@ -424,7 +425,7 @@
 											Involved: </label>
 										<div class="col-sm-6">
 											<sf:input path="lega_noti_amount_involved"
-												cssClass="form-control" placeholder="Enter Amount" />
+												cssClass="form-control"  maxlength="30" placeholder="Enter Amount" />
 											<!-- <i class="asterisk_input"></i> -->
 
 										</div>
@@ -437,7 +438,7 @@
 										</label>
 										<div class="col-sm-6">
 											<sf:input path="lega_noti_interest" cssClass="form-control"
-												placeholder="Enter Interest" />
+												placeholder="Enter Interest" maxlength="30" />
 											<!-- <i class="asterisk_input"></i> -->
 
 										</div>
@@ -573,7 +574,9 @@
 						$(document).on("click", ":submit", function(e) {
 							buttonClicked = $(this).val();
 							if (buttonClicked == "Update") {
-								if (validateForm() != false) {
+								//alert('update test')
+								if (
+	validateForm() != false) {
 									$("form").submit();
 								} else {
 									e.preventDefault();
