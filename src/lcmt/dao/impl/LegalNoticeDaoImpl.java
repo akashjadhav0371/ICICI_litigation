@@ -87,8 +87,14 @@ public class LegalNoticeDaoImpl implements LegalNoticeDao {
 	@Override
 	public LegalNotice getLegalNoticeById(int lega_noti_id) {
 		try {
-			String sql = "SELECT * FROM mst_legal_notice where lega_noti_id = " + lega_noti_id;
+			/*
+			 * String sql = "SELECT * FROM mst_legal_notice where lega_noti_id = " +
+			 * lega_noti_id; Query query = em.createNativeQuery(sql, LegalNotice.class);
+			 */
+			String sql = "SELECT * FROM mst_legal_notice WHERE lega_noti_id = :legaNotiId";
 			Query query = em.createNativeQuery(sql, LegalNotice.class);
+			query.setParameter("legaNotiId", lega_noti_id);
+
 			if (!query.getResultList().isEmpty()) {
 				// System.out.println("This is list size: "+ query.getResultList().size());
 				return (LegalNotice) query.getResultList().get(0);
@@ -534,11 +540,23 @@ public class LegalNoticeDaoImpl implements LegalNoticeDao {
 	@Override
 	public int deleteLegalNoticeStatus(int lega_status_id) {
 		try {
-			String sql_one = "Delete from trn_legal_notice_documents where lega_notice_id =" + lega_status_id
-					+ " AND lega_doc_related_to =2";
-			String sql = "Delete from trn_legal_notice_status where lega_status_id =" + lega_status_id;
+			/*
+			 * String sql_one =
+			 * "Delete from trn_legal_notice_documents where lega_notice_id =" +
+			 * lega_status_id + " AND lega_doc_related_to =2"; String sql =
+			 * "Delete from trn_legal_notice_status where lega_status_id =" +
+			 * lega_status_id; Query query_one = em.createNativeQuery(sql_one); Query query
+			 * = em.createNativeQuery(sql);
+			 */
+			String sql_one = "DELETE FROM trn_legal_notice_documents WHERE lega_notice_id = :legaStatusId AND lega_doc_related_to = 2";
+			String sql = "DELETE FROM trn_legal_notice_status WHERE lega_status_id = :legaStatusId";
+
 			Query query_one = em.createNativeQuery(sql_one);
+			query_one.setParameter("legaStatusId", lega_status_id);
+
 			Query query = em.createNativeQuery(sql);
+			query.setParameter("legaStatusId", lega_status_id);
+
 			query_one.executeUpdate();
 			query.executeUpdate();
 			return 1;
@@ -553,8 +571,14 @@ public class LegalNoticeDaoImpl implements LegalNoticeDao {
 	@Override
 	public int deleteLegaNotiStatusDoc(int doc_id) {
 		try {
-			String sql = "Delete from trn_legal_notice_documents where lega_doc_id =" + doc_id;
+			/*
+			 * String sql = "Delete from trn_legal_notice_documents where lega_doc_id =" +
+			 * doc_id; Query query = em.createNativeQuery(sql);
+			 */
+			String sql = "DELETE FROM trn_legal_notice_documents WHERE lega_doc_id = :docId";
 			Query query = em.createNativeQuery(sql);
+			query.setParameter("docId", doc_id);
+
 			query.executeUpdate();
 			return 1;
 		} catch (Exception e) {
@@ -566,14 +590,25 @@ public class LegalNoticeDaoImpl implements LegalNoticeDao {
 	@Override
 	public String getLatestActionTaken(int noti_id) {
 		try {
-			String sql = "SELECT lega_action_taken FROM trn_legal_notice_status where lega_notice_id =" + noti_id
-					+ " ORDER BY lega_status_id DESC LIMIT 1";
+			/*
+			 * String sql =
+			 * "SELECT lega_action_taken FROM trn_legal_notice_status where lega_notice_id ="
+			 * + noti_id + " ORDER BY lega_status_id DESC LIMIT 1"; Query query =
+			 * em.createNativeQuery(sql); if (query.getResultList().size() > 0 &&
+			 * query.getResultList().get(0) != null) { return
+			 * query.getResultList().get(0).toString(); } else { return "NA"; }
+			 */
+			String sql = "SELECT lega_action_taken FROM trn_legal_notice_status WHERE lega_notice_id = :notiId ORDER BY lega_status_id DESC LIMIT 1";
 			Query query = em.createNativeQuery(sql);
-			if (query.getResultList().size() > 0 && query.getResultList().get(0) != null) {
-				return query.getResultList().get(0).toString();
+			query.setParameter("notiId", noti_id);
+
+			List<?> resultList = query.getResultList();
+			if (!resultList.isEmpty() && resultList.get(0) != null) {
+			    return resultList.get(0).toString();
 			} else {
-				return "NA";
+			    return "NA";
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -586,16 +621,38 @@ public class LegalNoticeDaoImpl implements LegalNoticeDao {
 	@Override
 	public <T> List<T> getUserByLegalNoticeId(int orga_id, int loca_id, int dept_id) {
 		try {
-			String sql = "Select distinct lega_noti_assigned_to_id, user_first_name, user_last_name from mst_legal_notice "
-					+ " JOIN mst_user ON user_id = lega_noti_assigned_to_id " + " where lega_noti_entity_id= "
-					+ orga_id;
-			if (loca_id > 0) {
-				sql += " AND lega_noti_unit_id = " + loca_id;
-			}
-			if (dept_id > 0) {
-				sql += " AND lega_noti_function_id = " + dept_id;
-			}
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql =
+			 * "Select distinct lega_noti_assigned_to_id, user_first_name, user_last_name from mst_legal_notice "
+			 * + " JOIN mst_user ON user_id = lega_noti_assigned_to_id " +
+			 * " where lega_noti_entity_id= " + orga_id; if (loca_id > 0) { sql +=
+			 * " AND lega_noti_unit_id = " + loca_id; } if (dept_id > 0) { sql +=
+			 * " AND lega_noti_function_id = " + dept_id; } Query query =
+			 * em.createNativeQuery(sql);
+			 */
+			StringBuilder sql = new StringBuilder(
+				    "SELECT DISTINCT lega_noti_assigned_to_id, user_first_name, user_last_name " +
+				    "FROM mst_legal_notice " +
+				    "JOIN mst_user ON user_id = lega_noti_assigned_to_id " +
+				    "WHERE lega_noti_entity_id = :orgaId "
+				);
+
+				if (loca_id > 0) {
+				    sql.append("AND lega_noti_unit_id = :locaId ");
+				}
+				if (dept_id > 0) {
+				    sql.append("AND lega_noti_function_id = :deptId ");
+				}
+
+				Query query = em.createNativeQuery(sql.toString());
+				query.setParameter("orgaId", orga_id);
+				if (loca_id > 0) {
+				    query.setParameter("locaId", loca_id);
+				}
+				if (dept_id > 0) {
+				    query.setParameter("deptId", dept_id);
+				}
+
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -619,8 +676,14 @@ public class LegalNoticeDaoImpl implements LegalNoticeDao {
 	public LegalNotice getAllListlegalNotice(int lega_noti_id, HttpSession session) {
 		// TODO Auto-generated method stub
 		try {
-			String sql = " Select * FROM mst_legal_notice where lega_noti_id = " + lega_noti_id;
+			/*
+			 * String sql = " Select * FROM mst_legal_notice where lega_noti_id = " +
+			 * lega_noti_id; Query query = em.createNativeQuery(sql, LegalNotice.class);
+			 */
+			String sql = "SELECT * FROM mst_legal_notice WHERE lega_noti_id = :legaNotiId";
 			Query query = em.createNativeQuery(sql, LegalNotice.class);
+			query.setParameter("legaNotiId", lega_noti_id);
+
 			if (query.getResultList() != null)
 				return (LegalNotice) query.getResultList().get(0);
 		} catch (Exception e) {

@@ -41,7 +41,7 @@ import lcmt.service.UtilitiesService;
  * Date: 24/02/2016
  * Updated By: Mugdha Chandratre
  * Updated Date: 23/02/2016
- *
+ * 
  * */
 
 @Repository(value = "userDao")
@@ -51,7 +51,7 @@ public class UserDaoImpl implements UserDao {
 	@PersistenceContext
 	private EntityManager em;
 
-	@Autowired
+	@Autowired 
 	RandomPasswordGenService randomPasswordGenService;
 
 	@Autowired
@@ -65,7 +65,7 @@ public class UserDaoImpl implements UserDao {
 	private @Value("#{config['project_name'] ?: 'null'}") String projectName;
 	private @Value("#{config['project_url'] ?: 'null'}") String url;
 	private @Value("#{config['login_max_fail_count'] ?: 10}") int maxFailCount;
-
+	
 	private @Value("#{ldapconfig['ldap_ip'] ?: 'null'}") String ldap_ip;
 	private @Value("#{ldapconfig['ldap_port'] ?: 'null'}") int ldap_port;
 	private @Value("#{ldapconfig['serviceuserdn'] ?: 'null'}") String serviceuserdn;
@@ -84,57 +84,57 @@ public class UserDaoImpl implements UserDao {
 			 * + "' AND user_enable_status = 1"; Query queryNew =
 			 * em.createNativeQuery(sqlNew, User.class);
 			 */
-
-			String sqlNew = "SELECT * FROM mst_user WHERE user_username = :username AND user_enable_status = 1";
-			Query queryNew = em.createNativeQuery(sqlNew, User.class);
-			queryNew.setParameter("username", username);  // <-- Secure parameter binding
-			//System.out.println(" User DAO authenticateUser ");
-
+		  
+	        String sqlNew = "SELECT * FROM mst_user WHERE user_username = :username AND user_enable_status = 1";
+	        Query queryNew = em.createNativeQuery(sqlNew, User.class);
+	        queryNew.setParameter("username", username);  // <-- Secure parameter binding
+	        //System.out.println(" User DAO authenticateUser ");
+	        
 			if (!queryNew.getResultList().isEmpty()) {
 				//System.out.println("In first if  !query.getResultList().isEmpty() ");
 				User user = (User) queryNew.getSingleResult();
 
+				
+					 //System.out.println("In 3 if user != null ");
+					if (user != null && user.getUser_username().equalsIgnoreCase(username) && user.getUser_enable_status().equals("1")) {
+						 //System.out.println("In 4 iF");
+						 
+						 //System.out.println(" Db password"+user.getUser_userpassword());
+						 //System.out.println(" entered pwd"+password);
+						if (user.getUser_userpassword().equals(password)) {
+					//	if (authenticateUserLDAP(username, password)) {
+							//System.out.println("end method");
+								if(user.getUser_default_password_changed().equals("0")){
+									session.setAttribute("firstLogin", "1");
+								}
+								else{
+									session.setAttribute("firstLogin", "0");
+								}
+								session.setAttribute("sess_user_role", user.getUser_role_id());
+								session.setAttribute("sess_user_report_to", user.getUser_report_to());
+								session.setAttribute("login_fail_count", 0);
+								user.setUser_login_fail_count(0);
+								updateUser(user);
+								return Integer.toString(user.getUser_id());
+							
+							}
 
-				//System.out.println("In 3 if user != null ");
-				if (user != null && user.getUser_username().equalsIgnoreCase(username) && user.getUser_enable_status().equals("1")) {
-					//System.out.println("In 4 iF");
-
-					//System.out.println(" Db password"+user.getUser_userpassword());
-					//System.out.println(" entered pwd"+password);
-					if (user.getUser_userpassword().equals(password)) {
-						//	if (authenticateUserLDAP(username, password)) {
-						//System.out.println("end method");
-						if(user.getUser_default_password_changed().equals("0")){
-							session.setAttribute("firstLogin", "1");
+							else {
+								Integer cnt = user.getUser_login_fail_count();
+								user.setUser_login_fail_count(cnt==null ? 1 : ++cnt);
+								if(cnt>=maxFailCount) {user.setUser_enable_status("0");}
+								session.setAttribute("login_fail_count", cnt);
+								updateUser(user);
+								return "Incorrect password";
+							}
+							// session.setAttribute("sess_user_role",
+							// user.getUser_role_id());
+							// session.setAttribute("sess_user_report_to",
+							// user.getUser_report_to());
+							// return Integer.toString(user.getUser_id());
+						} else {
+							return "Incorrect password";
 						}
-						else{
-							session.setAttribute("firstLogin", "0");
-						}
-						session.setAttribute("sess_user_role", user.getUser_role_id());
-						session.setAttribute("sess_user_report_to", user.getUser_report_to());
-						session.setAttribute("login_fail_count", 0);
-						user.setUser_login_fail_count(0);
-						updateUser(user);
-						return Integer.toString(user.getUser_id());
-
-					}
-
-					else {
-						Integer cnt = user.getUser_login_fail_count();
-						user.setUser_login_fail_count(cnt==null ? 1 : ++cnt);
-						if(cnt>=maxFailCount) {user.setUser_enable_status("0");}
-						session.setAttribute("login_fail_count", cnt);
-						updateUser(user);
-						return "Incorrect password";
-					}
-					// session.setAttribute("sess_user_role",
-					// user.getUser_role_id());
-					// session.setAttribute("sess_user_report_to",
-					// user.getUser_report_to());
-					// return Integer.toString(user.getUser_id());
-				} else {
-					return "Incorrect password";
-				}
 					/*} else {
 						return "Incorrect username";
 					}*/
@@ -152,98 +152,98 @@ public class UserDaoImpl implements UserDao {
 		}
 
 	}
-
+	
 	// SSO feature-using Ldap properties
 
-	@Override
-	public boolean authenticateUserLDAP(String username, String password) {
-		// service user
-		//System.out.println("username" + username + "password" + password);
-		// System.out.println("In authencticateUserLDAP");
+		@Override
+		public boolean authenticateUserLDAP(String username, String password) {
+			// service user
+			//System.out.println("username" + username + "password" + password);
+		   // System.out.println("In authencticateUserLDAP");
+			
+		    String serviceUserDN = serviceuserdn;
+			String serviceUserPassword = serviceuserpassword;
+			
+			//System.out.println("confiusername" + serviceUserDN + "confipass" + serviceUserPassword);
 
-		String serviceUserDN = serviceuserdn;
-		String serviceUserPassword = serviceuserpassword;
+			// Following code is to decrypt string. Password is stored as encrypted
+			// in ldap.properties
+			//StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+			//encryptor.setPassword("jasypt");// Without setting this password this
+											// will not work. This password has be
+											// common for encrypting and decrypting
+			// String enString = encryptor.encrypt("Mahesh");
+			// System.out.println("Encrypted String:"+serviceUserPassword);
+			String dString = serviceUserPassword;
+			//System.out.println("Decrypted String:" + dString);
 
-		//System.out.println("confiusername" + serviceUserDN + "confipass" + serviceUserPassword);
+			// LDAP connection info
+			String ldap = ldap_ip;
+			int port = ldap_port;
+			String ldapUrl = "ldap://" + ldap + ":" + port;
 
-		// Following code is to decrypt string. Password is stored as encrypted
-		// in ldap.properties
-		//StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
-		//encryptor.setPassword("jasypt");// Without setting this password this
-		// will not work. This password has be
-		// common for encrypting and decrypting
-		// String enString = encryptor.encrypt("Mahesh");
-		// System.out.println("Encrypted String:"+serviceUserPassword);
-		String dString = serviceUserPassword;
-		//System.out.println("Decrypted String:" + dString);
+			// first create the service context
+			DirContext serviceCtx = null;
+			try {
+				
+				//System.out.println("in try");
+				// use the service user to authenticate
+				Properties serviceEnv = new Properties();
+				serviceEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+				serviceEnv.put(Context.PROVIDER_URL, ldapUrl);
+				serviceEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
+				serviceEnv.put(Context.SECURITY_PRINCIPAL, serviceUserDN);
+				serviceEnv.put(Context.SECURITY_CREDENTIALS, dString);
+				serviceCtx = new InitialDirContext(serviceEnv);
 
-		// LDAP connection info
-		String ldap = ldap_ip;
-		int port = ldap_port;
-		String ldapUrl = "ldap://" + ldap + ":" + port;
+				// user to authenticate
+				String identifyingAttribute = identifying_attribute;
+				String identifier = username;
+				// String password = "Lexcare@345";
+				 //System.out.println("This is service user: "+serviceUserDN);
+				//System.out.println("This is base: " + userbase);
+				String base = userbase;
 
-		// first create the service context
-		DirContext serviceCtx = null;
-		try {
+				// we don't need all attributes, just let it get the identifying one
+				String[] attributeFilter = {identifyingAttribute};
+				SearchControls sc = new SearchControls();
+				sc.setReturningAttributes(attributeFilter);
+				sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-			//System.out.println("in try");
-			// use the service user to authenticate
-			Properties serviceEnv = new Properties();
-			serviceEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-			serviceEnv.put(Context.PROVIDER_URL, ldapUrl);
-			serviceEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
-			serviceEnv.put(Context.SECURITY_PRINCIPAL, serviceUserDN);
-			serviceEnv.put(Context.SECURITY_CREDENTIALS, dString);
-			serviceCtx = new InitialDirContext(serviceEnv);
+				// use a search filter to find only the user we want to authenticate
+				String searchFilter = "(" + identifyingAttribute + "=" + identifier + ")";
+				NamingEnumeration<SearchResult> results = serviceCtx.search(base, searchFilter, sc);
+				//System.out.println("atribute" +attributeFilter);
+				if (results.hasMore()) {
+					// get the users DN (distinguishedName) from the result
+					SearchResult result = results.next();
+					String distinguishedName = result.getNameInNamespace();
 
-			// user to authenticate
-			String identifyingAttribute = identifying_attribute;
-			String identifier = username;
-			// String password = "Lexcare@345";
-			//System.out.println("This is service user: "+serviceUserDN);
-			//System.out.println("This is base: " + userbase);
-			String base = userbase;
+					// attempt another authentication, now with the user
+					Properties authEnv = new Properties();
+					authEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+					authEnv.put(Context.PROVIDER_URL, ldapUrl);
+					authEnv.put(Context.SECURITY_PRINCIPAL, distinguishedName);
+					authEnv.put(Context.SECURITY_CREDENTIALS, password);
+					new InitialDirContext(authEnv);
 
-			// we don't need all attributes, just let it get the identifying one
-			String[] attributeFilter = {identifyingAttribute};
-			SearchControls sc = new SearchControls();
-			sc.setReturningAttributes(attributeFilter);
-			sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-			// use a search filter to find only the user we want to authenticate
-			String searchFilter = "(" + identifyingAttribute + "=" + identifier + ")";
-			NamingEnumeration<SearchResult> results = serviceCtx.search(base, searchFilter, sc);
-			//System.out.println("atribute" +attributeFilter);
-			if (results.hasMore()) {
-				// get the users DN (distinguishedName) from the result
-				SearchResult result = results.next();
-				String distinguishedName = result.getNameInNamespace();
-
-				// attempt another authentication, now with the user
-				Properties authEnv = new Properties();
-				authEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-				authEnv.put(Context.PROVIDER_URL, ldapUrl);
-				authEnv.put(Context.SECURITY_PRINCIPAL, distinguishedName);
-				authEnv.put(Context.SECURITY_CREDENTIALS, password);
-				new InitialDirContext(authEnv);
-
-				//System.out.println("Authentication successful");
-				return true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (serviceCtx != null) {
-				try {
-					serviceCtx.close();
-				} catch (NamingException e) {
-					e.printStackTrace();
+					//System.out.println("Authentication successful");
+					return true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if (serviceCtx != null) {
+					try {
+						serviceCtx.close();
+					} catch (NamingException e) {
+						e.printStackTrace();
+					}
 				}
 			}
+			System.err.println("Authentication failed");
+			return false;
 		}
-		System.err.println("Authentication failed");
-		return false;
-	}
 
 	// Method Created By: Mugdha Chandratre 01/03/2016
 	// Method Purpose: Save the user in the database
@@ -274,8 +274,10 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public User getUserById(int user_id) {
 		try {
-			String sql = "SELECT * FROM mst_user where user_id = " + user_id;
+			String sql = "SELECT * FROM mst_user WHERE user_id = :userId";
 			Query query = em.createNativeQuery(sql, User.class);
+			query.setParameter("userId", user_id);
+			
 			if (!query.getResultList().isEmpty()) {
 				return (User) query.getResultList().get(0);
 			}
@@ -346,8 +348,13 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public <T> List<T> getUserFullNameById(int user_id) {
 		try {
-			String sql = "SELECT * FROM mst_user where user_id = " + user_id;
+			/*
+			 * String sql = "SELECT * FROM mst_user where user_id = " + user_id; Query query
+			 * = em.createNativeQuery(sql, User.class);
+			 */
+			String sql = "SELECT * FROM mst_user WHERE user_id = :userId";
 			Query query = em.createNativeQuery(sql, User.class);
+			query.setParameter("userId", user_id);
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -365,8 +372,10 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public int approveDisapproveUser(int user_id, int user_status) {
 		try {
-			String sql = "Update mst_user SET user_approval_status='" + user_status + "' where user_id=" + user_id;
+			String sql = "UPDATE mst_user SET user_approval_status = :userStatus WHERE user_id = :userId";
 			Query query = em.createNativeQuery(sql);
+			query.setParameter("userStatus", user_status);
+			query.setParameter("userId", user_id);
 			return query.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -379,8 +388,14 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public int enableDisableUser(int user_id, int user_status) {
 		try {
-			String sql = "Update mst_user SET user_enable_status='" + user_status + "' where user_id=" + user_id;
+			/*
+			 * String sql = "Update mst_user SET user_enable_status='" + user_status +
+			 * "' where user_id=" + user_id; Query query = em.createNativeQuery(sql);
+			 */
+			String sql = "UPDATE mst_user SET user_enable_status = :userStatus WHERE user_id = :userId";
 			Query query = em.createNativeQuery(sql);
+			query.setParameter("userStatus", user_status);
+			query.setParameter("userId", user_id);
 			return query.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -394,15 +409,40 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public List<Object> getUserAccess(int org_id, int loc_id, int dept_id) {
 		try {
-			String sql = "SELECT ent.enti_orga_id,ent.enti_loca_id,ent.enti_dept_id,orga.orga_name,loca.loca_name,dept.dept_name from cfg_entity_mapping as ent JOIN  mst_organization as orga ON orga.orga_id=ent.enti_orga_id JOIN mst_location as loca ON loca.loca_id=ent.enti_loca_id JOIN mst_department as dept ON dept.dept_id = ent.enti_dept_id where enti_orga_id="
-					+ org_id + " ";
-			if (loc_id != 0) {
-				sql += " AND enti_loca_id=" + loc_id;
-			}
-			if (dept_id != 0) {
-				sql += " AND enti_dept_id=" + dept_id;
-			}
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql =
+			 * "SELECT ent.enti_orga_id,ent.enti_loca_id,ent.enti_dept_id,orga.orga_name,loca.loca_name,dept.dept_name from cfg_entity_mapping as ent JOIN  mst_organization as orga ON orga.orga_id=ent.enti_orga_id JOIN mst_location as loca ON loca.loca_id=ent.enti_loca_id JOIN mst_department as dept ON dept.dept_id = ent.enti_dept_id where enti_orga_id="
+			 * + org_id + " "; if (loc_id != 0) { sql += " AND enti_loca_id=" + loc_id; } if
+			 * (dept_id != 0) { sql += " AND enti_dept_id=" + dept_id; } Query query =
+			 * em.createNativeQuery(sql);
+			 */
+			
+			StringBuilder sql = new StringBuilder(
+				    "SELECT ent.enti_orga_id, ent.enti_loca_id, ent.enti_dept_id, " +
+				    "orga.orga_name, loca.loca_name, dept.dept_name " +
+				    "FROM cfg_entity_mapping as ent " +
+				    "JOIN mst_organization as orga ON orga.orga_id = ent.enti_orga_id " +
+				    "JOIN mst_location as loca ON loca.loca_id = ent.enti_loca_id " +
+				    "JOIN mst_department as dept ON dept.dept_id = ent.enti_dept_id " +
+				    "WHERE enti_orga_id = :orgId "
+				);
+
+				if (loc_id != 0) {
+				    sql.append(" AND enti_loca_id = :locId ");
+				}
+				if (dept_id != 0) {
+				    sql.append(" AND enti_dept_id = :deptId ");
+				}
+
+				Query query = em.createNativeQuery(sql.toString());
+
+				query.setParameter("orgId", org_id);
+				if (loc_id != 0) {
+				    query.setParameter("locId", loc_id);
+				}
+				if (dept_id != 0) {
+				    query.setParameter("deptId", dept_id);
+				}
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -434,9 +474,25 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public List<Object> getUserAccessByUserId(int user_id) {
 		try {
-			String sql = "SELECT umap.umap_id,umap.umap_orga_id,umap.umap_loca_id ,umap.umap_dept_id,orga.orga_name,loca.loca_name,dept.dept_name from cfg_user_entity_mapping as umap JOIN  mst_organization as orga ON orga.orga_id=umap.umap_orga_id JOIN mst_location as loca ON loca.loca_id=umap.umap_loca_id JOIN mst_department as dept ON dept.dept_id = umap.umap_dept_id where umap_user_id="
-					+ user_id + " AND umap_enable_status=" + 1;
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql =
+			 * "SELECT umap.umap_id,umap.umap_orga_id,umap.umap_loca_id ,umap.umap_dept_id,orga.orga_name,loca.loca_name,dept.dept_name from cfg_user_entity_mapping as umap JOIN  mst_organization as orga ON orga.orga_id=umap.umap_orga_id JOIN mst_location as loca ON loca.loca_id=umap.umap_loca_id JOIN mst_department as dept ON dept.dept_id = umap.umap_dept_id where umap_user_id="
+			 * + user_id + " AND umap_enable_status=" + 1; Query query =
+			 * em.createNativeQuery(sql);
+			 */
+			
+			String sql = "SELECT umap.umap_id, umap.umap_orga_id, umap.umap_loca_id, umap.umap_dept_id, " +
+		             "orga.orga_name, loca.loca_name, dept.dept_name " +
+		             "FROM cfg_user_entity_mapping as umap " +
+		             "JOIN mst_organization as orga ON orga.orga_id = umap.umap_orga_id " +
+		             "JOIN mst_location as loca ON loca.loca_id = umap.umap_loca_id " +
+		             "JOIN mst_department as dept ON dept.dept_id = umap.umap_dept_id " +
+		             "WHERE umap_user_id = :userId AND umap_enable_status = :enableStatus";
+
+		Query query = em.createNativeQuery(sql);
+		query.setParameter("userId", user_id);
+		query.setParameter("enableStatus", 1);
+			
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -450,9 +506,27 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public List<Object> getOrgaForUserAccess(int user_id) {
 		try {
-			String sql = "SELECT distinct enti_orga_id,orga_name FROM cfg_entity_mapping join mst_organization ON orga_id = enti_orga_id where NOT exists ( select umap_orga_id from cfg_user_entity_mapping where umap_orga_id = enti_orga_id AND umap_loca_id = enti_loca_id AND umap_dept_id = enti_dept_id AND umap_user_id ='"
-					+ user_id + "' AND umap_enable_status = 1)";
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql =
+			 * "SELECT distinct enti_orga_id,orga_name FROM cfg_entity_mapping join mst_organization ON orga_id = enti_orga_id where NOT exists ( select umap_orga_id from cfg_user_entity_mapping where umap_orga_id = enti_orga_id AND umap_loca_id = enti_loca_id AND umap_dept_id = enti_dept_id AND umap_user_id ='"
+			 * + user_id + "' AND umap_enable_status = 1)"; Query query =
+			 * em.createNativeQuery(sql);
+			 */
+			String sql = "SELECT DISTINCT enti_orga_id, orga_name " +
+		             "FROM cfg_entity_mapping " +
+		             "JOIN mst_organization ON orga_id = enti_orga_id " +
+		             "WHERE NOT EXISTS ( " +
+		             "  SELECT umap_orga_id " +
+		             "  FROM cfg_user_entity_mapping " +
+		             "  WHERE umap_orga_id = enti_orga_id " +
+		             "    AND umap_loca_id = enti_loca_id " +
+		             "    AND umap_dept_id = enti_dept_id " +
+		             "    AND umap_user_id = :userId " +
+		             "    AND umap_enable_status = 1 " +
+		             ")";
+
+		Query query = em.createNativeQuery(sql);
+		query.setParameter("userId", user_id);
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -467,10 +541,33 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public List<Object> getLocaForUserAccess(int user_id, int orga_id) {
 		try {
-			String sql = "SELECT distinct enti_orga_id,orga_name,loca_id,loca_name FROM cfg_entity_mapping join mst_organization ON orga_id = enti_orga_id JOIN mst_location ON loca_id = enti_loca_id where NOT exists ( select umap_orga_id from cfg_user_entity_mapping where umap_orga_id = enti_orga_id AND umap_loca_id = enti_loca_id AND umap_dept_id = enti_dept_id AND umap_user_id ='"
-					+ user_id + "' AND umap_orga_id ='" + orga_id + "' AND umap_enable_status = 1) AND enti_orga_id = '"
-					+ orga_id + "'";
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql =
+			 * "SELECT distinct enti_orga_id,orga_name,loca_id,loca_name FROM cfg_entity_mapping join mst_organization ON orga_id = enti_orga_id JOIN mst_location ON loca_id = enti_loca_id where NOT exists ( select umap_orga_id from cfg_user_entity_mapping where umap_orga_id = enti_orga_id AND umap_loca_id = enti_loca_id AND umap_dept_id = enti_dept_id AND umap_user_id ='"
+			 * + user_id + "' AND umap_orga_id ='" + orga_id +
+			 * "' AND umap_enable_status = 1) AND enti_orga_id = '" + orga_id + "'"; Query
+			 * query = em.createNativeQuery(sql);
+			 */
+			String sql = "SELECT DISTINCT enti_orga_id, orga_name, loca_id, loca_name " +
+		             "FROM cfg_entity_mapping " +
+		             "JOIN mst_organization ON orga_id = enti_orga_id " +
+		             "JOIN mst_location ON loca_id = enti_loca_id " +
+		             "WHERE NOT EXISTS ( " +
+		             "  SELECT umap_orga_id " +
+		             "  FROM cfg_user_entity_mapping " +
+		             "  WHERE umap_orga_id = enti_orga_id " +
+		             "    AND umap_loca_id = enti_loca_id " +
+		             "    AND umap_dept_id = enti_dept_id " +
+		             "    AND umap_user_id = :userId " +
+		             "    AND umap_orga_id = :orgaId " +
+		             "    AND umap_enable_status = 1 " +
+		             ") " +
+		             "AND enti_orga_id = :orgaId";
+
+		Query query = em.createNativeQuery(sql);
+		query.setParameter("userId", user_id);
+		query.setParameter("orgaId", orga_id);
+
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -484,10 +581,38 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public List<Object> getDeptForUserAccess(int user_id, int orga_id, int loca_id) {
 		try {
-			String sql = "SELECT distinct enti_orga_id,orga_name,loca_id,loca_name,dept_id,dept_name FROM cfg_entity_mapping join mst_organization ON orga_id = enti_orga_id JOIN mst_location ON loca_id = enti_loca_id JOIN mst_department ON dept_id = enti_dept_id where NOT exists ( select umap_orga_id from cfg_user_entity_mapping where umap_orga_id = enti_orga_id AND umap_loca_id = enti_loca_id AND umap_dept_id = enti_dept_id AND umap_user_id = '"
-					+ user_id + "' AND umap_enable_status = 1 AND umap_orga_id = '" + orga_id + "' AND umap_loca_id = '"
-					+ loca_id + "' ) AND enti_orga_id = '" + orga_id + "' AND enti_loca_id = '" + loca_id + "' ";
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql =
+			 * "SELECT distinct enti_orga_id,orga_name,loca_id,loca_name,dept_id,dept_name FROM cfg_entity_mapping join mst_organization ON orga_id = enti_orga_id JOIN mst_location ON loca_id = enti_loca_id JOIN mst_department ON dept_id = enti_dept_id where NOT exists ( select umap_orga_id from cfg_user_entity_mapping where umap_orga_id = enti_orga_id AND umap_loca_id = enti_loca_id AND umap_dept_id = enti_dept_id AND umap_user_id = '"
+			 * + user_id + "' AND umap_enable_status = 1 AND umap_orga_id = '" + orga_id +
+			 * "' AND umap_loca_id = '" + loca_id + "' ) AND enti_orga_id = '" + orga_id +
+			 * "' AND enti_loca_id = '" + loca_id + "' "; Query query =
+			 * em.createNativeQuery(sql);
+			 */
+			String sql = "SELECT DISTINCT enti_orga_id, orga_name, loca_id, loca_name, dept_id, dept_name " +
+		             "FROM cfg_entity_mapping " +
+		             "JOIN mst_organization ON orga_id = enti_orga_id " +
+		             "JOIN mst_location ON loca_id = enti_loca_id " +
+		             "JOIN mst_department ON dept_id = enti_dept_id " +
+		             "WHERE NOT EXISTS ( " +
+		             "  SELECT umap_orga_id " +
+		             "  FROM cfg_user_entity_mapping " +
+		             "  WHERE umap_orga_id = enti_orga_id " +
+		             "    AND umap_loca_id = enti_loca_id " +
+		             "    AND umap_dept_id = enti_dept_id " +
+		             "    AND umap_user_id = :userId " +
+		             "    AND umap_enable_status = 1 " +
+		             "    AND umap_orga_id = :orgaId " +
+		             "    AND umap_loca_id = :locaId " +
+		             ") " +
+		             "AND enti_orga_id = :orgaId " +
+		             "AND enti_loca_id = :locaId";
+
+		Query query = em.createNativeQuery(sql);
+		query.setParameter("userId", user_id);
+		query.setParameter("orgaId", orga_id);
+		query.setParameter("locaId", loca_id);
+
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -502,8 +627,13 @@ public class UserDaoImpl implements UserDao {
 		try {
 			// String sql = "Update cfg_user_entity_mapping SET
 			// umap_enable_status='"+umap_status+"' where umap_id="+umap_id;
-			String sql = "Delete from cfg_user_entity_mapping where umap_id=" + umap_id;
+			/*
+			 * String sql = "Delete from cfg_user_entity_mapping where umap_id=" + umap_id;
+			 * Query query = em.createNativeQuery(sql);
+			 */
+			String sql = "DELETE FROM cfg_user_entity_mapping WHERE umap_id = :umapId";
 			Query query = em.createNativeQuery(sql);
+			query.setParameter("umapId", umap_id);
 			return query.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -517,15 +647,53 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public List<Object> getRemainUserAccess(int user_id, int orga_id, int loca_id, int dept_id) {
 		try {
-			String sql = "SELECT distinct enti_orga_id,orga_name,loca_id,loca_name,dept_id,dept_name FROM cfg_entity_mapping join mst_organization ON orga_id = enti_orga_id JOIN mst_location ON loca_id = enti_loca_id JOIN mst_department ON dept_id = enti_dept_id where NOT exists ( select umap_orga_id from cfg_user_entity_mapping where umap_orga_id = enti_orga_id AND umap_loca_id = enti_loca_id AND umap_dept_id = enti_dept_id AND umap_user_id = '"
-					+ user_id + "' AND umap_enable_status = 1 ) AND enti_orga_id = '" + orga_id + "' " + " ";
-			if (loca_id != 0) {
-				sql += "AND enti_loca_id = '" + loca_id + "'" + " ";
-			}
-			if (dept_id != 0) {
-				sql += "AND enti_dept_id = '" + dept_id + "'  ";
-			}
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql =
+			 * "SELECT distinct enti_orga_id,orga_name,loca_id,loca_name,dept_id,dept_name FROM cfg_entity_mapping join mst_organization ON orga_id = enti_orga_id JOIN mst_location ON loca_id = enti_loca_id JOIN mst_department ON dept_id = enti_dept_id where NOT exists ( select umap_orga_id from cfg_user_entity_mapping where umap_orga_id = enti_orga_id AND umap_loca_id = enti_loca_id AND umap_dept_id = enti_dept_id AND umap_user_id = '"
+			 * + user_id + "' AND umap_enable_status = 1 ) AND enti_orga_id = '" + orga_id +
+			 * "' " + " "; if (loca_id != 0) { sql += "AND enti_loca_id = '" + loca_id + "'"
+			 * + " "; } if (dept_id != 0) { sql += "AND enti_dept_id = '" + dept_id + "'  ";
+			 * } Query query = em.createNativeQuery(sql);
+			 */
+			StringBuilder sql = new StringBuilder(
+				    "SELECT DISTINCT enti_orga_id, orga_name, loca_id, loca_name, dept_id, dept_name " +
+				    "FROM cfg_entity_mapping " +
+				    "JOIN mst_organization ON orga_id = enti_orga_id " +
+				    "JOIN mst_location ON loca_id = enti_loca_id " +
+				    "JOIN mst_department ON dept_id = enti_dept_id " +
+				    "WHERE NOT EXISTS ( " +
+				    "  SELECT umap_orga_id " +
+				    "  FROM cfg_user_entity_mapping " +
+				    "  WHERE umap_orga_id = enti_orga_id " +
+				    "    AND umap_loca_id = enti_loca_id " +
+				    "    AND umap_dept_id = enti_dept_id " +
+				    "    AND umap_user_id = :userId " +
+				    "    AND umap_enable_status = 1 " +
+				    ") " +
+				    "AND enti_orga_id = :orgaId "
+				);
+
+				if (loca_id != 0) {
+				    sql.append("AND enti_loca_id = :locaId ");
+				}
+
+				if (dept_id != 0) {
+				    sql.append("AND enti_dept_id = :deptId ");
+				}
+
+				Query query = em.createNativeQuery(sql.toString());
+
+				query.setParameter("userId", user_id);
+				query.setParameter("orgaId", orga_id);
+
+				if (loca_id != 0) {
+				    query.setParameter("locaId", loca_id);
+				}
+
+				if (dept_id != 0) {
+				    query.setParameter("deptId", dept_id);
+				}
+
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -541,11 +709,28 @@ public class UserDaoImpl implements UserDao {
 
 		try {
 			// int cnt = 0;
-			String sql = "select count(*) as emp from mst_user where user_employee_id='" + emp_id + "' " + " ";
-			if (user_id != 0) {
-				sql += " AND user_id !=" + user_id;
-			}
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql = "select count(*) as emp from mst_user where user_employee_id='"
+			 * + emp_id + "' " + " "; if (user_id != 0) { sql += " AND user_id !=" +
+			 * user_id; } Query query = em.createNativeQuery(sql);
+			 */
+			
+			StringBuilder sql = new StringBuilder(
+				    "SELECT COUNT(*) AS emp FROM mst_user WHERE user_employee_id = :empId "
+				);
+
+				if (user_id != 0) {
+				    sql.append("AND user_id != :userId ");
+				}
+
+				Query query = em.createNativeQuery(sql.toString());
+				query.setParameter("empId", emp_id);
+
+				if (user_id != 0) {
+				    query.setParameter("userId", user_id);
+				}
+
+				
 			String cnt = query.getResultList().get(0).toString();
 
 			return Integer.parseInt(cnt);
@@ -584,11 +769,25 @@ public class UserDaoImpl implements UserDao {
 
 		try {
 
-			String sql = "select count(*) as username from mst_user where user_username='" + user_name + "' " + " ";
+			/*
+			 * String sql =
+			 * "select count(*) as username from mst_user where user_username='" + user_name
+			 * + "' " + " "; if (user_id != 0) { sql += " AND user_id !=" + user_id; } Query
+			 * query = em.createNativeQuery(sql);
+			 */
+			StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS username FROM mst_user WHERE user_username = :userName ");
+
 			if (user_id != 0) {
-				sql += " AND user_id !=" + user_id;
+			    sql.append("AND user_id != :userId ");
 			}
-			Query query = em.createNativeQuery(sql);
+
+			Query query = em.createNativeQuery(sql.toString());
+			query.setParameter("userName", user_name);
+
+			if (user_id != 0) {
+			    query.setParameter("userId", user_id);
+			}
+
 			String cnt = query.getResultList().get(0).toString();
 
 			return Integer.parseInt(cnt);
@@ -604,9 +803,23 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public <T> List<T> getUsersByOrganization(int orga_id) {
 		try {
-			String sql = "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id,user_report_to, user_role_id, user_username, user_userpassword, profile_pic FROM mst_user JOIN cfg_user_entity_mapping ON umap_user_id = user_id WHERE user_organization_id > 0 AND umap_orga_id = "
-					+ orga_id;
-			Query query = em.createNativeQuery(sql, User.class);
+			/*
+			 * String sql =
+			 * "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id,user_report_to, user_role_id, user_username, user_userpassword, profile_pic FROM mst_user JOIN cfg_user_entity_mapping ON umap_user_id = user_id WHERE user_organization_id > 0 AND umap_orga_id = "
+			 * + orga_id; Query query = em.createNativeQuery(sql, User.class);
+			 */
+			
+			String sql = "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, " +
+		             "user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, " +
+		             "user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id, " +
+		             "user_report_to, user_role_id, user_username, user_userpassword, profile_pic " +
+		             "FROM mst_user " +
+		             "JOIN cfg_user_entity_mapping ON umap_user_id = user_id " +
+		             "WHERE user_organization_id > 0 AND umap_orga_id = :orgaId";
+
+		Query query = em.createNativeQuery(sql, User.class);
+		query.setParameter("orgaId", orga_id);
+
 			if (!query.getResultList().isEmpty()) {
 				return query.getResultList();
 			}
@@ -623,12 +836,27 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public <T> List<T> getUsersByOrganizationLocation(int orga_id, int loca_id) {
 		try {
-			String sql = "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id,user_report_to, user_role_id, user_username, user_userpassword, profile_pic, user_default_password_changed FROM mst_user JOIN cfg_user_entity_mapping ON umap_user_id = user_id WHERE user_organization_id > 0 AND umap_orga_id = "
-					+ orga_id + " AND umap_loca_id = " + loca_id;
-			Query query = em.createNativeQuery(sql, User.class);
-			if (!query.getResultList().isEmpty()) {
-				return query.getResultList();
-			}
+			/*
+			 * String sql =
+			 * "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id,user_report_to, user_role_id, user_username, user_userpassword, profile_pic, user_default_password_changed FROM mst_user JOIN cfg_user_entity_mapping ON umap_user_id = user_id WHERE user_organization_id > 0 AND umap_orga_id = "
+			 * + orga_id + " AND umap_loca_id = " + loca_id; Query query =
+			 * em.createNativeQuery(sql, User.class); if (!query.getResultList().isEmpty())
+			 * { return query.getResultList(); }
+			 */
+			String sql = "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, " +
+		             "user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, " +
+		             "user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id, " +
+		             "user_report_to, user_role_id, user_username, user_userpassword, profile_pic, user_default_password_changed " +
+		             "FROM mst_user " +
+		             "JOIN cfg_user_entity_mapping ON umap_user_id = user_id " +
+		             "WHERE user_organization_id > 0 AND umap_orga_id = :orgaId AND umap_loca_id = :locaId";
+
+		Query query = em.createNativeQuery(sql, User.class);
+		query.setParameter("orgaId", orga_id);
+		query.setParameter("locaId", loca_id);
+
+		if (!query.getResultList().isEmpty())
+			  { return query.getResultList(); }
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -642,9 +870,33 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public <T> List<T> getUsersByOrganizationLocationDepartment(int orga_id, int loca_id, int dept_id) {
 		try {
-			String sql = "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id,user_report_to, user_role_id, user_username, user_userpassword, profile_pic, user_default_password_changed FROM mst_user JOIN cfg_user_entity_mapping ON umap_user_id = user_id WHERE user_organization_id > 0 AND umap_orga_id = "
-					+ orga_id + " AND umap_loca_id = " + loca_id + " AND umap_dept_id = " + dept_id +"  AND user_role_id != 3";
-			Query query = em.createNativeQuery(sql, User.class);
+			
+			/*
+			 * String sql =
+			 * "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id,user_report_to, user_role_id, user_username, user_userpassword, profile_pic, user_default_password_changed FROM mst_user JOIN cfg_user_entity_mapping ON umap_user_id = user_id WHERE user_organization_id > 0 AND umap_orga_id = "
+			 * + orga_id + " AND umap_loca_id = " + loca_id + " AND umap_dept_id = " +
+			 * dept_id +"  AND user_role_id != 3"; Query query = em.createNativeQuery(sql,
+			 * User.class);
+			 */
+			
+			String sql = "SELECT DISTINCT user_id, user_added_by, user_address, user_approval_status, user_created_at, " +
+		             "user_department_id, user_designation_id, user_email, user_employee_id, user_enable_status, " +
+		             "user_first_name, user_last_name, user_location_id, user_mobile, user_organization_id, " +
+		             "user_report_to, user_role_id, user_username, user_userpassword, profile_pic, user_default_password_changed " +
+		             "FROM mst_user " +
+		             "JOIN cfg_user_entity_mapping ON umap_user_id = user_id " +
+		             "WHERE user_organization_id > 0 " +
+		             "AND umap_orga_id = :orgaId " +
+		             "AND umap_loca_id = :locaId " +
+		             "AND umap_dept_id = :deptId " +
+		             "AND user_role_id != 3";
+
+		Query query = em.createNativeQuery(sql, User.class);
+		query.setParameter("orgaId", orga_id);
+		query.setParameter("locaId", loca_id);
+		query.setParameter("deptId", dept_id);
+
+		
 			if (!query.getResultList().isEmpty()) {
 				return query.getResultList();
 			}
@@ -669,16 +921,45 @@ public class UserDaoImpl implements UserDao {
 			int loca_id = Integer.parseInt(jsonObject.get("loca_id").toString());
 			int dept_id = Integer.parseInt(jsonObject.get("dept_id").toString());
 
-			String sql = "select DISTINCT cfg_task_user_mapping.tmap_pr_user_id,cfg_task_user_mapping.tmap_rw_user_id from cfg_task_user_mapping WHERE cfg_task_user_mapping.tmap_orga_id = "
-					+ orga_id;
-			if (loca_id != 0) {
-				sql += "  AND cfg_task_user_mapping.tmap_loca_id = " + loca_id;
-			}
-			if (dept_id != 0) {
-				sql += "  AND cfg_task_user_mapping.tmap_dept_id = " + dept_id;
-			}
-			sql += "  AND cfg_task_user_mapping.tmap_pr_user_id = " + user_id;
-			Query query = em.createNativeQuery(sql);
+			/*
+			 * String sql =
+			 * "select DISTINCT cfg_task_user_mapping.tmap_pr_user_id,cfg_task_user_mapping.tmap_rw_user_id from cfg_task_user_mapping WHERE cfg_task_user_mapping.tmap_orga_id = "
+			 * + orga_id; if (loca_id != 0) { sql +=
+			 * "  AND cfg_task_user_mapping.tmap_loca_id = " + loca_id; } if (dept_id != 0)
+			 * { sql += "  AND cfg_task_user_mapping.tmap_dept_id = " + dept_id; } sql +=
+			 * "  AND cfg_task_user_mapping.tmap_pr_user_id = " + user_id; Query query =
+			 * em.createNativeQuery(sql);
+			 */
+			
+			StringBuilder sql = new StringBuilder(
+				    "SELECT DISTINCT cfg_task_user_mapping.tmap_pr_user_id, cfg_task_user_mapping.tmap_rw_user_id " +
+				    "FROM cfg_task_user_mapping WHERE cfg_task_user_mapping.tmap_orga_id = :orgaId "
+				);
+
+				if (loca_id != 0) {
+				    sql.append("AND cfg_task_user_mapping.tmap_loca_id = :locaId ");
+				}
+
+				if (dept_id != 0) {
+				    sql.append("AND cfg_task_user_mapping.tmap_dept_id = :deptId ");
+				}
+
+				sql.append("AND cfg_task_user_mapping.tmap_pr_user_id = :userId");
+
+				Query query = em.createNativeQuery(sql.toString());
+				query.setParameter("orgaId", orga_id);
+
+				if (loca_id != 0) {
+				    query.setParameter("locaId", loca_id);
+				}
+
+				if (dept_id != 0) {
+				    query.setParameter("deptId", dept_id);
+				}
+
+				query.setParameter("userId", user_id);
+
+				
 			if (query.getResultList().size() != 0) {
 				List<Object> PerRev = query.getResultList();
 				Iterator<Object> itr = PerRev.iterator();
@@ -834,7 +1115,7 @@ public class UserDaoImpl implements UserDao {
 
 			/*SONObject jsonObject = (JSONObject) new JSONParser().parse(json);
 			int umap_id = Integer.parseInt(jsonObject.get("umap_id").toString());
-			//int user_id = Integer.parseInt(session.getAttribute("sess_user_id").toString());
+			//int user_id = Integer.parseInt(session.getAttribute("sess_user_id").toString());			 
 			String sql_per = "SELECT count(*) FROM `cfg_task_user_mapping` join cfg_user_entity_mapping ON cfg_user_entity_mapping.umap_orga_id = cfg_task_user_mapping.tmap_orga_id AND cfg_user_entity_mapping.umap_loca_id = cfg_task_user_mapping.tmap_loca_id AND cfg_user_entity_mapping.umap_dept_id = cfg_task_user_mapping.tmap_dept_id AND cfg_user_entity_mapping.umap_user_id = cfg_task_user_mapping.tmap_pr_user_id WHERE cfg_user_entity_mapping.umap_id = "+umap_id;
 			Query query = em.createNativeQuery(sql_per);
 
@@ -902,8 +1183,8 @@ public class UserDaoImpl implements UserDao {
 						Transport.send(message);
 						utilitiesService.addMailToLog(user_mailId,"Reset Password");
 						return "true";
-					}
-					catch (Exception e)
+					} 
+					catch (Exception e) 
 					{
 						e.printStackTrace();
 					}
@@ -942,9 +1223,13 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public String authenticateUserPeopleSoft(String empno, HttpSession session) {
 		try {
-
+			
 
 			if(empno != ""){
+				/*
+				 * String sqlNew = "SELECT * FROM mst_user where user_employee_id =  '"+ empno
+				 * +"'" ; Query queryNew = em.createNativeQuery(sqlNew, User.class);
+				 */
 				String sqlNew = "SELECT * FROM mst_user where user_employee_id =  '"+ empno +"'" ;
 				Query queryNew = em.createNativeQuery(sqlNew, User.class);
 				if(queryNew.getSingleResult() != null){
@@ -1009,12 +1294,12 @@ public class UserDaoImpl implements UserDao {
 		}
 		return null;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public List<String> getUserFullName(){
 		try{
 			String sql ="Select user_first_name From mst_user" ;
-
+			
 			Query query = em.createNativeQuery(sql);
 			return query.getResultList();
 		} catch (Exception e) {

@@ -982,8 +982,9 @@ public class LitigationDaoImpl implements LitigationDao {
 	@Override
 	public String getpreviouslitiId(String liti_id) {
 		try {
-			String sql = " SELECT liti_id FROM mst_litigation where liti_client_liti_id = '" + liti_id + "'";
+			String sql = "SELECT liti_id FROM mst_litigation WHERE liti_client_liti_id = :litiId";
 			Query query = em.createNativeQuery(sql);
+			query.setParameter("litiId", liti_id);
 			if (!query.getResultList().isEmpty()) {
 				String result = query.getResultList().get(0).toString();
 				return result;

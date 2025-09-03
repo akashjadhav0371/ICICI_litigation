@@ -317,9 +317,24 @@ public class EntityMappingDaoImpl implements EntityMappingDao {
 		@Override
 		public List<Object> getLocationByOrgaUserId(HttpSession session, int orga_id) {
 			try {
+				/*
+				 * int sess_user_id =
+				 * Integer.parseInt(session.getAttribute("sess_user_id").toString()); String
+				 * sql=
+				 * "SELECT DISTINCT loca_id,loca_name FROM mst_location JOIN cfg_user_entity_mapping ON umap_loca_id = loca_id WHERE umap_user_id = "
+				 * +sess_user_id+" and umap_orga_id = "+orga_id; Query query =
+				 * em.createNativeQuery(sql);
+				 */
 				int sess_user_id = Integer.parseInt(session.getAttribute("sess_user_id").toString());
-				String sql= "SELECT DISTINCT loca_id,loca_name FROM mst_location JOIN cfg_user_entity_mapping ON umap_loca_id = loca_id WHERE umap_user_id = "+sess_user_id+" and umap_orga_id = "+orga_id;
+
+				String sql = "SELECT DISTINCT loca_id, loca_name FROM mst_location " +
+				             "JOIN cfg_user_entity_mapping ON umap_loca_id = loca_id " +
+				             "WHERE umap_user_id = :sessUserId AND umap_orga_id = :orgaId";
+
 				Query query = em.createNativeQuery(sql);
+				query.setParameter("sessUserId", sess_user_id);
+				query.setParameter("orgaId", orga_id);
+
 				return query.getResultList();
 				
 			} catch (Exception e) {
@@ -366,8 +381,14 @@ public class EntityMappingDaoImpl implements EntityMappingDao {
 	@Override
 	public List<States> getAllStateByCounId(int coun_id) {
 		try {
-			String sql = "select * from mst_states where stat_country_id=" + coun_id;
-			Query query = em.createNativeQuery(sql,States.class);
+			/*
+			 * String sql = "select * from mst_states where stat_country_id=" + coun_id;
+			 * Query query = em.createNativeQuery(sql,States.class);
+			 */
+			String sql = "SELECT * FROM mst_states WHERE stat_country_id = :countryId";
+			Query query = em.createNativeQuery(sql, States.class);
+			query.setParameter("countryId", coun_id);
+
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -380,8 +401,14 @@ public class EntityMappingDaoImpl implements EntityMappingDao {
 	@Override
 	public List<Cities> getAllCityByStateId(int state_id) {
 		try {
-			String sql = "select * from mst_cities where city_state_id =" + state_id;
-			Query query = em.createNativeQuery(sql,Cities.class);
+			/*
+			 * String sql = "select * from mst_cities where city_state_id =" + state_id;
+			 * Query query = em.createNativeQuery(sql,Cities.class);
+			 */
+			String sql = "SELECT * FROM mst_cities WHERE city_state_id = :stateId";
+			Query query = em.createNativeQuery(sql, Cities.class);
+			query.setParameter("stateId", state_id);
+
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
