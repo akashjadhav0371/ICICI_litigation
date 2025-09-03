@@ -251,5 +251,6 @@ $(document).ready(function(){
 	}); 
 });
 </script>
+<script src="appJs/common/utils.js"></script>
 <script src="appJs/Query/query_validation.js"></script>
 <jsp:include page="/WEB-INF/views/footer.jsp"></jsp:include>

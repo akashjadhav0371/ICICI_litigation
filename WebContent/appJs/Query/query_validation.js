@@ -731,40 +731,46 @@ function getAllLocationForOrganization() {
          {
          	$('#quer_query').popover('destroy');
         }
-    	
+
+		if (!validateAndShowPopover("#quer_from_id") ||
+				    !validateAndShowPopover("#quer_query")
+			) {
+				    return false;
+			}
+
     	if (quer_assigned_to == 0) {
-        	 
+
      		$( "#quer_assigned_to" ).attr( "data-placement", "top" );
      		$( "#quer_assigned_to" ).attr( "data-content", "Please enter person name." );
      		$('#quer_assigned_to').popover('show');
-	
+
             return false;
         }
     	 else
          {
          	$('#quer_assigned_to').popover('destroy');
         }
-    	
+
     	if (quer_query_date == 0) {
-       	 
+
      		$( "#quer_query_date" ).attr( "data-placement", "top" );
      		$( "#quer_query_date" ).attr( "data-content", "Please enter query date." );
      		$('#quer_query_date').popover('show');
-	
+
             return false;
         }
     	 else
          {
          	$('#quer_query_date').popover('destroy');
         }
-    	
-    	
+
+
     	if (quer_reply_date == 0) {
-       	 
+
      		$( "#quer_reply_date" ).attr( "data-placement", "top" );
      		$( "#quer_reply_date" ).attr( "data-content", "Please enter reply date." );
      		$('#quer_reply_date').popover('show');
-	
+
             return false;
         }
     	 else
@@ -772,7 +778,7 @@ function getAllLocationForOrganization() {
          	$('#quer_reply_date').popover('destroy');
         }
     	if (quer_reminder_date == 0) {
-          	 
+
      		$( "#quer_reminder_date" ).attr( "data-placement", "top" );
      		$( "#quer_reminder_date" ).attr( "data-content", "Please enter reminder date." );
      		$('#quer_reminder_date').popover('show');
@@ -782,16 +788,15 @@ function getAllLocationForOrganization() {
          {
          	$('#quer_reminder_date').popover('destroy');
         }
-    	
-    	
-    	
-    	
+
+
+
     	/*if(Date.parse(quer_reminder_date) >= Date.parse(quer_reply_date)) {
-          	 
+
      		$( "#quer_reminder_date" ).attr( "data-placement", "top" );
      		$( "#quer_reminder_date" ).attr( "data-content", "Please enter date before the reply date." );
      		$('#quer_reminder_date').popover('show');
-	
+
             return false;
         }
     	 else
@@ -799,10 +804,10 @@ function getAllLocationForOrganization() {
          	$('#quer_reminder_date').popover('destroy');
         }*/
    }
-	
-	
+
+
 	function validateHstForm(){
-		
+
 			var query_hst_status = $('#query_hst_status').val();
 	        var query_hst_others = $('#query_hst_others').val();
 	        var query_hst_replied_date = $('#query_hst_replied_date').val();
@@ -815,11 +820,11 @@ function getAllLocationForOrganization() {
 	        var query_hst_comments = $('#query_hst_comments').val();
 
     	if (query_hst_status == 0) {
-         	 
+
      		$( "#query_hst_status" ).attr( "data-placement", "top" );
      		$( "#query_hst_status" ).attr( "data-content", "Please select status." );
      		$('#query_hst_status').popover('show');
-	
+
             return false;
         }
     	 else
@@ -827,11 +832,11 @@ function getAllLocationForOrganization() {
          	$('#query_hst_status').popover('destroy');
         }
     	if (query_hst_status == "Save As Draft") {
-        	 
+
      		$( "#query_hst_status" ).attr( "data-placement", "top" );
      		$( "#query_hst_status" ).attr( "data-content", "Please select status other than 'Save As Draft'." );
      		$('#query_hst_status').popover('show');
-	
+
             return false;
         }
     	 else
@@ -840,11 +845,11 @@ function getAllLocationForOrganization() {
         }
     	if(query_hst_status == 'Others'){
     	if (query_hst_others == 0) {
-       	 
+
      		$( "#query_hst_others" ).attr( "data-placement", "top" );
      		$( "#query_hst_others" ).attr( "data-content", "Please enter others." );
      		$('#query_hst_others').popover('show');
-	
+
             return false;
         }
     	}
@@ -853,24 +858,24 @@ function getAllLocationForOrganization() {
          	$('#query_hst_others').popover('destroy');
         }
     	/*if (query_hst_replied_date == 0) {
-          	 
+
      		$( "#query_hst_replied_date" ).attr( "data-placement", "top" );
      		$( "#query_hst_replied_date" ).attr( "data-content", "Please Enter Replied Date." );
      		$('#query_hst_replied_date').popover('show');
-	
+
             return false;
         }
     	 else
          {
          	$('#query_hst_replied_date').popover('destroy');
         }*/
-    	
+
     	if (query_hst_action_tobe_performed == 0) {
-         	 
+
      		$( "#query_hst_action_tobe_performed" ).attr( "data-placement", "top" );
      		$( "#query_hst_action_tobe_performed" ).attr( "data-content", "Please enter action to be performed." );
      		$('#query_hst_action_tobe_performed').popover('show');
-	
+
             return false;
         }
     	 else
@@ -879,11 +884,11 @@ function getAllLocationForOrganization() {
         }
     	if(query_hst_action_tobe_performed == 'Others'){
     	if (query_hst_action_performed_others == 0) {
-         	 
+
      		$( "#query_hst_action_performed_others" ).attr( "data-placement", "top" );
      		$( "#query_hst_action_performed_others" ).attr( "data-content", "Please enter others." );
      		$('#query_hst_action_performed_others').popover('show');
-	
+
             return false;
         }
     	}
@@ -892,11 +897,11 @@ function getAllLocationForOrganization() {
          	$('#query_hst_action_performed_others').popover('destroy');
         }
     	if (query_hst_action_tobe_performed_by == 0) {
-         	 
+
      		$( "#query_hst_action_tobe_performed_by" ).attr( "data-placement", "top" );
      		$( "#query_hst_action_tobe_performed_by" ).attr( "data-content", "Please enter action to be performed by." );
      		$('#query_hst_action_tobe_performed_by').popover('show');
-	
+
             return false;
         }
     	 else
@@ -905,11 +910,11 @@ function getAllLocationForOrganization() {
         }
     	if(query_hst_action_tobe_performed_by == 'Others'){
     	if (query_hst_action_performed_by_others == 0) {
-         	 
+
      		$( "#query_hst_action_performed_by_others" ).attr( "data-placement", "top" );
      		$( "#query_hst_action_performed_by_others" ).attr( "data-content", "Please enter others." );
      		$('#query_hst_action_performed_by_others').popover('show');
-	
+
             return false;
         }
     	}
@@ -917,13 +922,13 @@ function getAllLocationForOrganization() {
          {
          	$('#query_hst_action_performed_by_others').popover('destroy');
         }
-    	
+
     	if (query_hst_action_assigned_to == 0) {
-        	 
+
      		$( "#query_hst_action_assigned_to" ).attr( "data-placement", "top" );
      		$( "#query_hst_action_assigned_to" ).attr( "data-content", "Please enter action assigned to." );
      		$('#query_hst_action_assigned_to').popover('show');
-	
+
             return false;
         }
     	 else
@@ -931,11 +936,11 @@ function getAllLocationForOrganization() {
          	$('#query_hst_action_assigned_to').popover('destroy');
         }
     	/*if (query_hst_replied_by == 0) {
-        	 
+
      		$( "#query_hst_replied_by" ).attr( "data-placement", "top" );
      		$( "#query_hst_replied_by" ).attr( "data-content", "Please enter action performed by." );
      		$('#query_hst_replied_by').popover('show');
-	
+
             return false;
         }
     	 else
@@ -943,11 +948,11 @@ function getAllLocationForOrganization() {
          	$('#query_hst_replied_by').popover('destroy');
         }*/
     	if (query_hst_comments == 0) {
-        	 
+
      		$( "#query_hst_comments" ).attr( "data-placement", "top" );
      		$( "#query_hst_comments" ).attr( "data-content", "Please enter comments." );
      		$('#query_hst_comments').popover('show');
-	
+
             return false;
         }
     	 else
@@ -957,51 +962,57 @@ function getAllLocationForOrganization() {
 	}
 
 	function validateDraft() {
-        
+
 		var quer_entity_id = $("#quer_entity_id").val();
         var quer_unit_id = $('#quer_unit_id').val();
         var quer_function_id = $('#quer_function_id').val();
-        
-        
+
+
         if (quer_entity_id == 0 ) {
-       	 
+
      		$( "#quer_entity_id" ).attr( "data-placement", "top" );
      		$( "#quer_entity_id" ).attr( "data-content", "Please select entity name." );
      		$('#quer_entity_id').popover('show');
-	
+
             return false;
         }
     	 else
          {
          	$('#user_orga_id').popover('destroy');
         }
-    	
+
     	if (quer_unit_id == 0) {
-          	 
+
      		$( "#quer_unit_id" ).attr( "data-placement", "top" );
      		$( "#quer_unit_id" ).attr( "data-content", "Please select unit name." );
      		$('#quer_unit_id').popover('show');
-	
+
             return false;
         }
     	 else
          {
          	$('#quer_unit_id').popover('destroy');
         }
-    	
+
     	if (quer_function_id == 0) {
-       	 
+
      		$( "#quer_function_id" ).attr( "data-placement", "top" );
      		$( "#quer_function_id" ).attr( "data-content", "Please select function name." );
      		$('#quer_function_id').popover('show');
-	
+
             return false;
         }
     	 else
          {
          	$('#quer_function_id').popover('destroy');
         }
-    	
+
+		if (!validateAndShowPopover("#quer_from_id") ||
+						    !validateAndShowPopover("#quer_query")) {
+				    return false;
+			}
+
+
    }
 
 function validateHstDraft(){
