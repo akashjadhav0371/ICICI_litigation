@@ -68,7 +68,7 @@ public class LegalNoticeController {
 	CurrencyService currencyService;
 	@Autowired
 	LitigationService litigationService;
-
+	
 	private static final Set<Integer> ALLOWED_ROLES = new HashSet<>(Arrays.asList(1, 5, 7, 8, 9));
 
 	// Method Created : Harshad Padole
@@ -95,25 +95,25 @@ public class LegalNoticeController {
 	@RequestMapping(value = "/addLegalNotice", method = RequestMethod.GET)
 	public ModelAndView addLegalNotice(HttpSession session) {
 		try {
-
+			
 			Integer userRole = (Integer) session.getAttribute("sess_user_role");
-			if (userRole != null && ALLOWED_ROLES.contains(userRole)) {
-				ModelAndView modelAndView = new ModelAndView("addLegalNotice", "addLegalNotice",
-						new LegalNotice_Reference());
-				modelAndView.addObject("allOrganization", entityMappingService.getOrganizationByUserId(session));
-				// modelAndView.addObject("allUser", userService.getAllUser());
-				modelAndView.addObject("allLegalCategory", legalCategoryService.getAll());
-				modelAndView.addObject("allCurrency", currencyService.getAll());
-				modelAndView.addObject("allUsers", userService.getAllUser());
-				List<Ext_Coun_Reference> counsels = externalCounselService.getAll();
-				Map<Integer, String> sendList = new HashMap<Integer, String>();
-				for (Ext_Coun_Reference temp : counsels) {
-					sendList.put(0, "--Select--");
-					sendList.put(temp.getExte_coun_id(), temp.getExte_coun_name());
-				}
-				modelAndView.addObject("allExternalCounsel", sendList);
-				return modelAndView;
+			 if (userRole != null && ALLOWED_ROLES.contains(userRole)) {
+			ModelAndView modelAndView = new ModelAndView("addLegalNotice", "addLegalNotice",
+					new LegalNotice_Reference());
+			modelAndView.addObject("allOrganization", entityMappingService.getOrganizationByUserId(session));
+			// modelAndView.addObject("allUser", userService.getAllUser());
+			modelAndView.addObject("allLegalCategory", legalCategoryService.getAll());
+			modelAndView.addObject("allCurrency", currencyService.getAll());
+			modelAndView.addObject("allUsers", userService.getAllUser());
+			List<Ext_Coun_Reference> counsels = externalCounselService.getAll();
+			Map<Integer, String> sendList = new HashMap<Integer, String>();
+			for (Ext_Coun_Reference temp : counsels) {
+				sendList.put(0, "--Select--");
+				sendList.put(temp.getExte_coun_id(), temp.getExte_coun_name());
 			}
+			modelAndView.addObject("allExternalCounsel", sendList);
+			return modelAndView;
+			 }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -124,11 +124,11 @@ public class LegalNoticeController {
 	// Method Purpose : Save Legal Notice
 	@RequestMapping(value = "/saveLegalNotice", method = RequestMethod.POST)
 	public String saveLegalNotice(LegalNotice_Reference legalNotice_Reference,
-								  @RequestParam(name = "lega_noti_req_id", required = false, defaultValue = "0") int id,
-								  @RequestParam("legal_doc") ArrayList<MultipartFile> legal_doc,
-								  @RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
-								  @RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft,
-								  HttpSession session) {
+			@RequestParam(name = "lega_noti_req_id", required = false, defaultValue = "0") int id,
+			@RequestParam("legal_doc") ArrayList<MultipartFile> legal_doc,
+			@RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
+			@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft,
+			HttpSession session) {
 		try {
 			String status = "";
 			if (save.equals("Save")) {
@@ -150,52 +150,60 @@ public class LegalNoticeController {
 	@RequestMapping(value = "/editLegalNotice", method = RequestMethod.GET)
 	public ModelAndView editLegalNotice(int lega_noti_id, HttpSession session) {
 		try {
-
+			
 			Integer userRole = (Integer) session.getAttribute("sess_user_role");
-			if (userRole != null && ALLOWED_ROLES.contains(userRole)) {
+			 if (userRole != null && ALLOWED_ROLES.contains(userRole)) {
+				 
+			LegalNotice_Reference legalNotice = legalNoticeService.getLegalNoticeById(lega_noti_id);
+			int user_id = Integer.parseInt(session.getAttribute("sess_user_id").toString());
+			if(legalNotice.getLega_noti_assigned_to_id() == user_id
+					|| legalNotice.getLega_noti_secondary_responsible_person() == user_id
+					|| legalNotice.getLega_noti_third_responsible_person() == user_id) {
+			ModelAndView modelAndView = new ModelAndView("editLegalNotice", "editLegalNotice", legalNotice);
+			modelAndView.addObject("allOrganization", entityMappingService.getOrganizationByUserId(session));
 
-				LegalNotice_Reference legalNotice = legalNoticeService.getLegalNoticeById(lega_noti_id);
-				ModelAndView modelAndView = new ModelAndView("editLegalNotice", "editLegalNotice", legalNotice);
-				modelAndView.addObject("allOrganization", entityMappingService.getOrganizationByUserId(session));
+			int orga = legalNotice.getLega_noti_entity_id();
+			int loca = legalNotice.getLega_noti_unit_id();
+			int dept = legalNotice.getLega_noti_function_id();
 
-				int orga = legalNotice.getLega_noti_entity_id();
-				int loca = legalNotice.getLega_noti_unit_id();
-				int dept = legalNotice.getLega_noti_function_id();
+			/*
+			 * modelAndView.addObject("user_legal_department",
+			 * userService.getUsersByOrganizationLocationDepartment (orga,loca ,dept));
+			 * 
+			 * modelAndView.addObject("users_legals_departments",
+			 * userService.getUsersByOrganizationLocationDepartment (orga,loca ,dept));
+			 * 
+			 * modelAndView.addObject("user_third_legal_department",
+			 * userService.getUsersByOrganizationLocationDepartment (orga, loca ,dept));
+			 * 
+			 * modelAndView.addObject("user_other_legal_department",
+			 * userService.getUsersByOrganizationLocationDepartment (orga, loca ,dept));
+			 */
 
-				/*
-				 * modelAndView.addObject("user_legal_department",
-				 * userService.getUsersByOrganizationLocationDepartment (orga,loca ,dept));
-				 *
-				 * modelAndView.addObject("users_legals_departments",
-				 * userService.getUsersByOrganizationLocationDepartment (orga,loca ,dept));
-				 *
-				 * modelAndView.addObject("user_third_legal_department",
-				 * userService.getUsersByOrganizationLocationDepartment (orga, loca ,dept));
-				 *
-				 * modelAndView.addObject("user_other_legal_department",
-				 * userService.getUsersByOrganizationLocationDepartment (orga, loca ,dept));
-				 */
-
-				modelAndView.addObject("allLocations", entityMappingService.getLocationByUserId(session, orga));
-				modelAndView.addObject("allDepartments", entityMappingService.getDeptByUserId(session, loca, orga));
-				modelAndView.addObject("allLegalCategory", legalCategoryService.getAll());
-				modelAndView.addObject("allCurrency", currencyService.getAll());
-				modelAndView.addObject("allUsers", userService.getAllUser());
-				List<Ext_Coun_Reference> counsels = externalCounselService.getAll();
-				Map<Integer, String> sendList = new HashMap<Integer, String>();
-				for (Ext_Coun_Reference temp : counsels) {
-					sendList.put(0, "--Select--");
-					sendList.put(temp.getExte_coun_id(), temp.getExte_coun_name());
-				}
-				modelAndView.addObject("allExternalCounsel", sendList);
-				modelAndView.addObject("NoticeStatus", legalNotice.getLega_noti_status());
-				return modelAndView;
+			modelAndView.addObject("allLocations", entityMappingService.getLocationByUserId(session, orga));
+			modelAndView.addObject("allDepartments", entityMappingService.getDeptByUserId(session, loca, orga));
+			modelAndView.addObject("allLegalCategory", legalCategoryService.getAll());
+			modelAndView.addObject("allCurrency", currencyService.getAll());
+			modelAndView.addObject("allUsers", userService.getAllUser());
+			List<Ext_Coun_Reference> counsels = externalCounselService.getAll();
+			Map<Integer, String> sendList = new HashMap<Integer, String>();
+			for (Ext_Coun_Reference temp : counsels) {
+				sendList.put(0, "--Select--");
+				sendList.put(temp.getExte_coun_id(), temp.getExte_coun_name());
 			}
-			else {
-				// Unauthorized access
-				// model.addAttribute("error", "You do not have permission to access this page.");
-				// return "accessDenied";  // error JSP page or view
-			}
+			modelAndView.addObject("allExternalCounsel", sendList);
+			modelAndView.addObject("NoticeStatus", legalNotice.getLega_noti_status());
+			return modelAndView;
+			 }else {
+		           System.out.println("Notice Not assigned to you ");
+		        }
+			 }
+			 else {
+				 System.out.println(" Not have permission to view ");
+		            // Unauthorized access
+		           // model.addAttribute("error", "You do not have permission to access this page.");
+		           // return "accessDenied";  // error JSP page or view
+		        }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -206,10 +214,10 @@ public class LegalNoticeController {
 	// Method Purpose : Update legal notice
 	@RequestMapping(value = "/updateLegalNotice", method = RequestMethod.POST)
 	public String updateLegalNotice(LegalNotice_Reference legalNotice_Reference,
-									@RequestParam("legal_doc") ArrayList<MultipartFile> legal_doc,
-									@RequestParam(value = "Update", required = false, defaultValue = "d_update") String save,
-									@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft,
-									HttpSession session) {
+			@RequestParam("legal_doc") ArrayList<MultipartFile> legal_doc,
+			@RequestParam(value = "Update", required = false, defaultValue = "d_update") String save,
+			@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft,
+			HttpSession session) {
 		try {
 			String status = "";
 			if (save.equals("Update")) {
@@ -296,9 +304,9 @@ public class LegalNoticeController {
 
 	@RequestMapping(value = "/saveLegalNoticeStatus", method = RequestMethod.POST)
 	public String saveLegalNoticeStatus(LegalNoticeStatus legalNoticeStatus,
-										@RequestParam("lega_status_doc") ArrayList<MultipartFile> lega_status_doc, HttpSession session,
-										@RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
-										@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft) {
+			@RequestParam("lega_status_doc") ArrayList<MultipartFile> lega_status_doc, HttpSession session,
+			@RequestParam(value = "Save", required = false, defaultValue = "d_save") String save,
+			@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft) {
 		try {
 			String status = "";
 			if (save.equals("Save")) {
@@ -352,9 +360,9 @@ public class LegalNoticeController {
 	// Method Purpose : Update status
 	@RequestMapping(value = "/updateLegalNoticeStatus", method = RequestMethod.POST)
 	public String updateLegalNoticeStatus(LegalNoticeStatus legalNoticeStatus, HttpSession session,
-										  @RequestParam("lega_status_doc") ArrayList<MultipartFile> lega_status_doc,
-										  @RequestParam(value = "Update", required = false, defaultValue = "d_save") String update,
-										  @RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft) {
+			@RequestParam("lega_status_doc") ArrayList<MultipartFile> lega_status_doc,
+			@RequestParam(value = "Update", required = false, defaultValue = "d_save") String update,
+			@RequestParam(value = "Draft", required = false, defaultValue = "d_draft") String draft) {
 		try {
 			String status = "";
 			if (update.equals("Update")) {
@@ -426,7 +434,7 @@ public class LegalNoticeController {
 	 * throws ParseException { try { SimpleDateFormat sdfIn = new
 	 * SimpleDateFormat("yyyy-MM-dd"); SimpleDateFormat sdfOut = new
 	 * SimpleDateFormat("dd-MM-yyyy");
-	 *
+	 * 
 	 * JSONObject jsonObj = (JSONObject) new JSONParser().parse(json); // String
 	 * converted_amt_currency = jsonObj.get("converted_amt_currency").toString();
 	 * String involved_amt_currency =
@@ -437,24 +445,24 @@ public class LegalNoticeController {
 	 * = ""; if (!(involved_amt_currency).equals(converted_amt_currency)) { URL url
 	 * = new URL("http://api.fixer.io/" + amtDate + "?from=" + involved_amt_currency
 	 * + "&to=" + converted_amt_currency);
-	 *
+	 * 
 	 * URLConnection connection = url.openConnection();
-	 *
+	 * 
 	 * connection.connect(); // Cast to a HttpURLConnection if (connection
 	 * instanceof HttpURLConnection) { HttpURLConnection httpConnection =
 	 * (HttpURLConnection) connection; int code = httpConnection.getResponseCode();
 	 * //System.out.println("COde " + code); if (code == 200) { String data =
 	 * IOUtils.toString(url);
-	 *
+	 * 
 	 * JSONObject json1 = (JSONObject) new JSONParser().parse(data); JSONObject
 	 * convertedcurrency = (JSONObject) json1.get("rates"); //
 	 * System.out.println("currency is // :"+convertedcurrency); if
 	 * (convertedcurrency.size() != 0) { Rate =
 	 * convertedcurrency.get(converted_amt_currency).toString(); } else { Rate =
 	 * "0.0"; } } else { Rate = "0.0"; } } } else { Rate = "1.0"; } return Rate;
-	 *
+	 * 
 	 * } catch (Exception e) { e.printStackTrace(); return String.valueOf(0); }
-	 *
+	 * 
 	 * }
 	 */
 
