@@ -14,8 +14,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.crypto.*;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.json.simple.JSONArray;
@@ -66,9 +68,9 @@ public class UserController {
 
 	private @Value("#{config['project_name'] ?: 'null'}") String project_name;
 
-	//Method Created By: Mahesh Kharote
-	//Method Purpose: Check username and password and set session attributes for
-	//further use
+	// Method Created By: Mahesh Kharote
+	// Method Purpose: Check username and password and set session attributes for
+	// further use
 	@RequestMapping(value = "/authenticateUserPeopleSoft", method = RequestMethod.POST)
 	public String authenticateUser(HttpSession session, String empno) {
 		try {
@@ -97,8 +99,8 @@ public class UserController {
 		}
 	}
 
-	//Method Created By: Mugdha Chandratre
-	//Method Purpose: To set date and time format
+	// Method Created By: Mugdha Chandratre
+	// Method Purpose: To set date and time format
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
 		try {
@@ -110,10 +112,10 @@ public class UserController {
 		}
 	}
 
-	//Method Created By: Mahesh Kharote
-	//Method Purpose: Test page for harmony
-	@RequestMapping(value = "/pageForPeopleSoft" , method = RequestMethod.GET)
-	public ModelAndView pageForHarmony(){
+	// Method Created By: Mahesh Kharote
+	// Method Purpose: Test page for harmony
+	@RequestMapping(value = "/pageForPeopleSoft", method = RequestMethod.GET)
+	public ModelAndView pageForHarmony() {
 		try {
 			ModelAndView modelAndView = new ModelAndView("pageForPeopleSoft");
 			return modelAndView;
@@ -124,10 +126,11 @@ public class UserController {
 
 	}
 
-	//Method Created By: Mahesh Kharote
-	//Method Purpose: Check username and password and set session attributes for further use
-	@RequestMapping(value = "/userLogin" , method = RequestMethod.GET)
-	public ModelAndView userLogin(HttpSession session){
+	// Method Created By: Mahesh Kharote
+	// Method Purpose: Check username and password and set session attributes for
+	// further use
+	@RequestMapping(value = "/userLogin", method = RequestMethod.GET)
+	public ModelAndView userLogin(HttpSession session) {
 		try {
 			session.setAttribute("sess_user_id", 0);
 			session.setAttribute("username", "Guest");
@@ -139,21 +142,21 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created By: Mahesh Kharote
-	//Method Purpose: Check username and password and set session attributes for
-	//further use
+	// Method Created By: Mahesh Kharote
+	// Method Purpose: Check username and password and set session attributes for
+	// further use
 	@RequestMapping(value = "/authenticateUser", method = RequestMethod.POST)
 	public String authenticateUser(HttpSession session, String user_username, String user_userpassword) {
 		try {
-
+			
 			//System.out.println("@@@ authenticateUser " + user_username);
 
 			//System.out.println("@@@ user_userpassword encripted " + user_userpassword);
 
-			//Decode base64 encrypted password
+			// Decode base64 encrypted password
 			byte[] encryptedBytes = Base64.getDecoder().decode(user_userpassword);
 
-			//Decrypt with private key
+			// Decrypt with private key
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.DECRYPT_MODE, KeyUtil.getPrivateKey());
 			String decryptedPassword = new String(cipher.doFinal(encryptedBytes));
@@ -167,7 +170,7 @@ public class UserController {
 					session.setAttribute("loginErrorType", "InvalidUsername");
 				} else {
 					if (loginStatus == "Incorrect password") {
-
+						
 						session.setAttribute("loginErrorType", "InvalidPassword");
 					}
 				}
@@ -189,18 +192,18 @@ public class UserController {
 		}
 	}
 
-	//Method Created By: Mahesh Kharote
-	//Method Purpose: Check username and password and set session attributes for
-	//further use
+	// Method Created By: Mahesh Kharote
+	// Method Purpose: Check username and password and set session attributes for
+	// further use
 	@RequestMapping(value = "/authenticationFailed", method = RequestMethod.GET)
 	public ModelAndView authenticationFailed(HttpSession session) {
 		try {
 			ModelAndView modelAndView = new ModelAndView("userLogin");
 			if (session.getAttribute("loginErrorType").toString().equals("InvalidUsername")) {
-				//modelAndView.addObject("errorType", "InvalidUsername");
+				// modelAndView.addObject("errorType", "InvalidUsername");
 			} else {
 				if (session.getAttribute("loginErrorType").toString().equals("InvalidPassword")) {
-					//modelAndView.addObject("errorType", "InvalidPassword");
+					// modelAndView.addObject("errorType", "InvalidPassword");
 				}
 			}
 			return modelAndView;
@@ -211,9 +214,9 @@ public class UserController {
 		}
 	}
 
-	//Method Created By: Mahesh Kharote
-	//Method Purpose: Check username and password and set session attributes for
-	//further use
+	// Method Created By: Mahesh Kharote
+	// Method Purpose: Check username and password and set session attributes for
+	// further use
 	@RequestMapping(value = "/userLogout", method = RequestMethod.GET)
 	public ModelAndView userLogout(HttpSession session) {
 		try {
@@ -227,8 +230,8 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created By: Rahul Shinde
-	//Method Purpose: Show User Profile
+	// Method Created By: Rahul Shinde
+	// Method Purpose: Show User Profile
 	@RequestMapping(value = "/myAccount", method = RequestMethod.GET)
 	public ModelAndView myAccount(HttpSession session) {
 		try {
@@ -243,8 +246,8 @@ public class UserController {
 	}
 
 
-	//Method Created By: Mugdha Chandratre
-	//Method Purpose: Fetch all list of user from database
+	// Method Created By: Mugdha Chandratre
+	// Method Purpose: Fetch all list of user from database
 	@RequestMapping(value = "/listUsers", method = RequestMethod.GET)
 	public ModelAndView listUsers() {
 		try {
@@ -256,17 +259,17 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created By: Mugdha Chandratre
-	//Method Purpose: Load new user form
+	// Method Created By: Mugdha Chandratre
+	// Method Purpose: Load new user form
 	@RequestMapping(value = "/addUser", method = RequestMethod.GET)
 	public ModelAndView addUser() {
 		try {
 			ModelAndView modelAndView = new ModelAndView("addUser", "user", new User());
 			modelAndView.addObject("allDesignations", designationService.getAll());
 			modelAndView.addObject("allOrganizations", organizationService.getAll());
-			//modelAndView.addObject("allUser",
-			//userService.getUsersByOrganizationLocationDepartment(orga_id, loca_id,
-			//dept_id));
+			// modelAndView.addObject("allUser",
+			// userService.getUsersByOrganizationLocationDepartment(orga_id, loca_id,
+			// dept_id));
 			return modelAndView;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -274,8 +277,8 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created By: Mugdha Chandratre
-	//Method Purpose: Add new user into the database
+	// Method Created By: Mugdha Chandratre
+	// Method Purpose: Add new user into the database
 	@RequestMapping(value = "/saveUser", method = RequestMethod.POST)
 	public String saveUser(User user) {
 		try {
@@ -288,10 +291,10 @@ public class UserController {
 
 	}
 
-	//Method Created By: Mugdha Chandratre
-	//Method Purpose: Load edit user form
-	//Updated By: Mahesh Kharote
-	//Purpose: Edit user name on edit user page
+	// Method Created By: Mugdha Chandratre
+	// Method Purpose: Load edit user form
+	// Updated By: Mahesh Kharote
+	// Purpose: Edit user name on edit user page
 	@RequestMapping(value = "/editUser", method = RequestMethod.GET)
 	public ModelAndView editUser(int user_id) {
 		try {
@@ -302,7 +305,7 @@ public class UserController {
 			user_role.put(1, "Executor");
 			user_role.put(2, "Evaluator");
 			user_role.put(3, "Function Head");
-			user_role.put(4, "Unit Head"); //Added by Harshad FH,UH,EH on 2 May 2016
+			user_role.put(4, "Unit Head"); // Added by Harshad FH,UH,EH on 2 May 2016
 			user_role.put(5, "Entity Head");
 			ModelAndView modelAndView = new ModelAndView("editUser", "user", user);
 			int orga = user.getUser_organization_id();
@@ -324,8 +327,8 @@ public class UserController {
 
 	}
 
-	//Method Created By: Mugdha Chandratre
-	//Method Purpose: Update particular user into the database
+	// Method Created By: Mugdha Chandratre
+	// Method Purpose: Update particular user into the database
 	@RequestMapping(value = "/updateUser", method = RequestMethod.POST)
 	public String updateUser(User user) {
 		try {
@@ -338,8 +341,8 @@ public class UserController {
 
 	}
 
-	//Method created : Harshad Padole
-	//Method purpose : Approve or disapprove entity
+	// Method created : Harshad Padole
+	// Method purpose : Approve or disapprove entity
 	@RequestMapping(value = "/approveDisapproveUser", method = RequestMethod.POST)
 	public @ResponseBody String approveDisapproveUser(@RequestBody String jsonString) throws ParseException {
 		try {
@@ -355,8 +358,8 @@ public class UserController {
 
 	}
 
-	//Method created : Harshad Padole
-	//Method purpose : Enable or disable entity
+	// Method created : Harshad Padole
+	// Method purpose : Enable or disable entity
 	@RequestMapping(value = "/enableDisableUser", method = RequestMethod.POST)
 	public @ResponseBody String enableDisableUser(@RequestBody String jsonString) throws ParseException {
 		try {
@@ -372,8 +375,8 @@ public class UserController {
 
 	}
 
-	//Method Created : Harshad padole
-	//Method Purpose : Load Set access Level page
+	// Method Created : Harshad padole
+	// Method Purpose : Load Set access Level page
 	@RequestMapping(value = "/setAccessLevel", method = RequestMethod.GET)
 	public ModelAndView setAccessLevel() {
 		try {
@@ -387,8 +390,8 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created : Harshad Padole
-	//Method Purpose : Get mapped access using ajax call
+	// Method Created : Harshad Padole
+	// Method Purpose : Get mapped access using ajax call
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getAccessList", method = RequestMethod.POST)
 	public @ResponseBody String getMappedaccess(@RequestBody String jsonString) throws ParseException {
@@ -420,8 +423,8 @@ public class UserController {
 		}
 		return null;
 	}
-	//Method Created : Harshad Padole
-	//Method Purpose : Save user access
+	// Method Created : Harshad Padole
+	// Method Purpose : Save user access
 	@RequestMapping(value = "/setAccessToUser", method = RequestMethod.POST)
 	public @ResponseBody String setAccessToUser(@RequestBody String jsonStringStoreData) throws ParseException {
 		try {
@@ -433,8 +436,8 @@ public class UserController {
 		return "Error";
 
 	}
-	//Method Created : Harshad Padole
-	//Method Purpose : Load edit access level page
+	// Method Created : Harshad Padole
+	// Method Purpose : Load edit access level page
 	@RequestMapping(value = "/editAcccessLevel", method = RequestMethod.GET)
 	public ModelAndView editAccesslevel(@RequestParam("user_id") int user_id) {
 		try {
@@ -447,8 +450,8 @@ public class UserController {
 
 	}
 
-	//Method Created : Harshad Padole
-	//Method Purpose : get user mapped access
+	// Method Created : Harshad Padole
+	// Method Purpose : get user mapped access
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getUserMappedAccess", method = RequestMethod.POST)
 	public @ResponseBody String getUserMappedAccess(@RequestBody String jsonString) throws ParseException {
@@ -480,8 +483,8 @@ public class UserController {
 
 	}
 
-	//Method Created : Harshad Padole
-	//Method Purpose : get organization for user access by user id
+	// Method Created : Harshad Padole
+	// Method Purpose : get organization for user access by user id
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getOrgaforUserAccess", method = RequestMethod.POST)
 	public @ResponseBody String getOrgaforUserAccess(@RequestBody String jsonString) throws ParseException {
@@ -508,8 +511,8 @@ public class UserController {
 
 	}
 
-	//Method Created : Harshad Padole
-	//Method Purpose : get Location for user access by user id and orga_id
+	// Method Created : Harshad Padole
+	// Method Purpose : get Location for user access by user id and orga_id
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getLocaforUserAccess", method = RequestMethod.POST)
 	public @ResponseBody String getLocaforUserAccess(@RequestBody String jsonString) throws ParseException {
@@ -539,8 +542,8 @@ public class UserController {
 
 	}
 
-	//Method Created : Harshad Padole
-	//Method Purpose : get Department for user access by user id,orga_id and loc_id
+	// Method Created : Harshad Padole
+	// Method Purpose : get Department for user access by user id,orga_id and loc_id
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getDeptforUserAccess", method = RequestMethod.POST)
 	public @ResponseBody String getDeptforUserAccess(@RequestBody String jsonString) throws ParseException {
@@ -573,8 +576,8 @@ public class UserController {
 
 	}
 
-	//Method Created : Harshad Padole
-	//Method purpose : Disable User mapped access
+	// Method Created : Harshad Padole
+	// Method purpose : Disable User mapped access
 	@RequestMapping(value = "/disableUmapAccess", method = RequestMethod.POST)
 	public @ResponseBody String disableUmapAccess(@RequestBody String jsonString) throws ParseException {
 		JSONObject jsonObj = (JSONObject) new JSONParser().parse(jsonString);
@@ -589,8 +592,8 @@ public class UserController {
 		return String.valueOf(0);
 	}
 
-	//Method Created : Harshad Padole
-	//Method Purpose : get remaining access to user while editing user access
+	// Method Created : Harshad Padole
+	// Method Purpose : get remaining access to user while editing user access
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getRemainUserAccess", method = RequestMethod.POST)
 	public @ResponseBody String getRemainUserAccess(@RequestBody String jsonString) throws ParseException {
@@ -625,8 +628,8 @@ public class UserController {
 
 	}
 
-	//Method Created : Harshad Padole
-	//Method Purpose : Check employee id exist or not
+	// Method Created : Harshad Padole
+	// Method Purpose : Check employee id exist or not
 	@RequestMapping(value = "/checkExistEmployeeId", method = RequestMethod.POST)
 	public @ResponseBody String checkExistEmployeeId(@RequestBody String jsonString) throws ParseException {
 
@@ -643,8 +646,8 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created : Mugdha Chandratre
-	//Method Purpose : Verify if email id is exist or not
+	// Method Created : Mugdha Chandratre
+	// Method Purpose : Verify if email id is exist or not
 	@RequestMapping(value = "/isEmailIdExist", method = RequestMethod.POST)
 	public @ResponseBody String isEmailIdExist(@RequestBody String jsonString) throws ParseException {
 
@@ -661,8 +664,8 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created :Harshad Padole
-	//Method Purpose : Verify if user name id is exist or not
+	// Method Created :Harshad Padole
+	// Method Purpose : Verify if user name id is exist or not
 	@RequestMapping(value = "/isUserNameExist", method = RequestMethod.POST)
 	public @ResponseBody String isUserNameExist(@RequestBody String jsonString) throws ParseException {
 
@@ -679,15 +682,15 @@ public class UserController {
 		return null;
 	}
 
-	//Author : Rahul Shinde
+	// Author : Rahul Shinde
 	@RequestMapping(value = "/uploadProfilePic", method = RequestMethod.POST)
 	public @ResponseBody ModelAndView uploadProfilePic(@RequestParam("profile_pic") MultipartFile file1,
-													   HttpSession session) throws IOException {
+			HttpSession session) throws IOException {
 
 		if (file1.getSize() > 0) {
 
-			//Creating the directory to store file
-			//String rootPath = System.getProperty("catalina.base");
+			// Creating the directory to store file
+			// String rootPath = System.getProperty("catalina.base");
 			File dir = new File("C:/" + project_name + "/profile_pics/");
 			if (!dir.exists())
 				dir.mkdirs();
@@ -712,7 +715,7 @@ public class UserController {
 		return modelAndView;
 	}
 
-	//Author : Rahul Shinde
+	// Author : Rahul Shinde
 	@RequestMapping(value = "/getProfilePic", method = RequestMethod.GET, produces = "images/jpeg; charset=utf-8")
 	public @ResponseBody byte[] getProfilePicData(HttpSession session) {
 		try {
@@ -734,12 +737,14 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created By: Rahul Shinde
-	//Method Purpose: To Change Password
+	// Method Created By: Rahul Shinde
+	// Method Purpose: To Change Password
 	@RequestMapping(value = "/ChangePassword", method = RequestMethod.GET)
 	public ModelAndView ChangePassword(HttpSession session) {
 		try {
 
+			 String token = UUID.randomUUID().toString();
+	         session.setAttribute("CSRF_TOKEN", token);
 			ModelAndView modelAndView = new ModelAndView("ChangePassword");
 			return modelAndView;
 
@@ -750,63 +755,79 @@ public class UserController {
 	}
 
 	/*
-	 * //Method Created :Rahul Shinde //Method Purpose : get Original Password
-	 *
+	 * // Method Created :Rahul Shinde // Method Purpose : get Original Password
+	 * 
 	 * @RequestMapping(value = "/getOriginalPassword", method = RequestMethod.POST)
 	 * public @ResponseBody String getOriginalPass(HttpSession session) throws
 	 * ParseException {
-	 *
+	 * 
 	 * try {
-	 *
+	 * 
 	 * String oldPassword = userService
 	 * .getUserPassword(Integer.parseInt(session.getAttribute("sess_user_id").
 	 * toString())); return oldPassword; } catch (Exception e) {
 	 * e.printStackTrace(); }
-	 *
+	 * 
 	 * return null; }
 	 */
-
+	
 	@RequestMapping(value = "/getOriginalPassword", method = RequestMethod.POST)
 	public @ResponseBody String getOriginalPass(HttpSession session) throws ParseException {
-		try {
-			Object userIdObj = session.getAttribute("sess_user_id");
-			if (userIdObj == null) {
-				//Optionally return a specific message or HTTP 401 Unauthorized
-				return "USER_NOT_LOGGED_IN";
-			}
-			int userId = Integer.parseInt(userIdObj.toString());
-			//System.out.println("#@#@####userId:"+userId);
-			String oldPassword = userService.getUserPassword(userId);
-			//System.out.println("#@#@####oldPassword:"+oldPassword);
-			if (oldPassword == null) {
-				return "PASSWORD_NOT_FOUND";
-			}
-			return oldPassword;
-		} catch (Exception e) {
-			//Use proper logging here
-			e.printStackTrace();
-			return "ERROR";
-		}
+	    try {
+	        Object userIdObj = session.getAttribute("sess_user_id");
+	        if (userIdObj == null) {
+	            // Optionally return a specific message or HTTP 401 Unauthorized
+	            return "USER_NOT_LOGGED_IN";
+	        }
+	        int userId = Integer.parseInt(userIdObj.toString());
+	        //System.out.println("#@#@####userId:"+userId);
+	        String oldPassword = userService.getUserPassword(userId);
+	       // System.out.println("#@#@####oldPassword:"+oldPassword);
+	        if (oldPassword == null) {
+	            return "PASSWORD_NOT_FOUND";
+	        }
+	        return oldPassword;
+	    } catch (Exception e) {
+	        // Use proper logging here
+	        e.printStackTrace();
+	        return "ERROR";
+	    }
 	}
 
 
-	//Method Created By: Rahul Shinde
-	//Method Purpose: To Change Password
+	// Method Created By: Rahul Shinde
+	// Method Purpose: To Change Password
 	@RequestMapping(value = "/ChangeNewPassword", method = RequestMethod.POST)
-	public ModelAndView ChangeNewPassword(@RequestParam("confPassword") String newPass, HttpSession session) {
+	public ModelAndView ChangeNewPassword(@RequestParam("confPassword") String newPass,
+			@RequestParam("csrfToken") String requestToken,
+			HttpSession session) {
 		try {
+			
+			/*
+			 * if (session == null) { //
+			 * response.sendError(HttpServletResponse.SC_FORBIDDEN,
+			 * "Session expired or invalid"); return null; }
+			 */
+
+			    String sessionToken = (String) session.getAttribute("CSRF_TOKEN");
+			    //String requestToken = request.getParameter("csrfToken");
+
+			    if (sessionToken == null || !sessionToken.equals(requestToken)) {
+			       // response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+			        return null;
+			    }
 			//System.out.println("newPass "+newPass);
-			//Decode base64 encrypted password
+			// Decode base64 encrypted password
 			byte[] encryptedBytes = Base64.getDecoder().decode(newPass);
 
-			//Decrypt with private key
+			// Decrypt with private key
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.DECRYPT_MODE, KeyUtil.getPrivateKey());
 			String decryptedPassword = new String(cipher.doFinal(encryptedBytes));
 			//System.out.println("decryptedPassword "+decryptedPassword);
 			int res = userService.changeNewPassword(decryptedPassword,
 					Integer.parseInt(session.getAttribute("sess_user_id").toString()));
-			//session.setAttribute("firstLogin", null);
+			// session.setAttribute("firstLogin", null);
 			ModelAndView modelAndView = new ModelAndView("ChangePassword");
 			modelAndView.addObject("result", res);
 			session.setAttribute("firstLogin", "0");
@@ -816,8 +837,8 @@ public class UserController {
 		}
 		return null;
 	}
-	//Method Created :Harshad Padole
-	//Method Purpose : Check task exist for user or not while removing access
+	// Method Created :Harshad Padole
+	// Method Purpose : Check task exist for user or not while removing access
 	@RequestMapping(value = "/checkExistTaskForUser", method = RequestMethod.POST)
 	public @ResponseBody String checkExistTaskForUser(@RequestBody String json, HttpSession session)
 			throws ParseException {
@@ -829,7 +850,6 @@ public class UserController {
 		}
 		return null;
 	}
-
 
 	@RequestMapping(value = "/resetUserPassword", method = RequestMethod.POST)
 	public ModelAndView resetUserPassword(
@@ -910,8 +930,8 @@ public class UserController {
 		return null;
 	}
 
-	//Method Created : Tejashri Zurunge
-	//Method Purpose : get all reporting person
+	// Method Created : Tejashri Zurunge
+	// Method Purpose : get all reporting person
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getAllReportingUsersByOrganizationLocationDepartment", method = RequestMethod.POST)
 	public @ResponseBody String getAllReportingUsersByOrganizationLocationDepartment(@RequestBody String jsonString)

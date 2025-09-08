@@ -8,6 +8,10 @@
 
 <div class="page_cont_padd">
 	<div class="page_container">
+	
+	<%
+    String csrfToken = (String) session.getAttribute("CSRF_TOKEN");
+%>
 
 		<!--heading text-->
 		<div class="col-md-12">
@@ -50,6 +54,7 @@
 						<div class="col-md-6">
 							<label>Confirm Password:</label> <input id="confPassword" 
 								class="form-control" type="password" name="confPassword" />
+									<input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
 						</div>
 					</div>
 				</div>
