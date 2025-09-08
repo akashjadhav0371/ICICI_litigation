@@ -5,6 +5,7 @@
 
 <%@ page import="java.util.Date,java.text.SimpleDateFormat,java.text.ParseException"%>
 <%@page import="java.text.SimpleDateFormat"%>
+<%@ page session="true" %>
 
 <jsp:include page="/WEB-INF/views/header.jsp"></jsp:include>
 <script src="appJs/Dashboard/dashboard.js"></script>

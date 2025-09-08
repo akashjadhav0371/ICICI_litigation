@@ -45,7 +45,7 @@
 								</h4>
 							</div>
 							<div class="modal-body">
-								<p>Incorrect Username...!</p>
+								<p>Login failed: Invalid username or account is disabled. Please verify your credentials or contact support.</p>
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-default"
@@ -83,6 +83,7 @@
 						    </div>
 						  </c:when>
 						  <c:otherwise>
+						  
 						    <!-- Optionally display a default message or nothing -->
 						  </c:otherwise>
 						</c:choose>
@@ -141,11 +142,14 @@
 							</center>
 						</div>
 					</div>
-
+					
+			
 				</sf:form>
 			</div>
 
 		</div>
+
+
 
 		<div style="clear: both"></div>
 		<div class="copy_right animated slideInDown">

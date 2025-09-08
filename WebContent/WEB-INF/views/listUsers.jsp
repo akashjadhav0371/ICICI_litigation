@@ -106,7 +106,7 @@
     </table>
  </c:when>
             <c:otherwise>
-        <tr> <td> Only Admin Role can view the user list </td></tr>
+        <tr> <td> <h2> Access Denied: You do not have sufficient privileges to view the user list. </h2></td></tr>
     </c:otherwise>
 </c:choose>
 				
