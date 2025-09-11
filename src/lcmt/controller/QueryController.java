@@ -97,7 +97,8 @@ public class QueryController {
 			if(draft.equals("Draft")){
 				status = "Draft";	
 			}
-			if(InputValidator.validateInputNoSpecialChars(query_reference.getQuer_query())) {
+			if(InputValidator.validateInputNoSpecialChars(query_reference.getQuer_query())
+					&& InputValidator.validateInputNoSpecialChars(query_reference.getQuer_from_id())) {
 				queryService.persist(query_reference, query_doc,id, session, status);
 				return "redirect:listQuery";
 			}
@@ -147,7 +148,9 @@ public class QueryController {
 				status = "Draft";	
 			}
 			
-			if(InputValidator.validateInputNoSpecialChars(query_Reference.getQuer_query())) {
+			if(InputValidator.validateInputNoSpecialChars(query_Reference.getQuer_query())
+				&& InputValidator.validateInputNoSpecialChars(query_Reference.getQuer_from_id())
+				) {
 				queryService.updateQuery(query_Reference, query_doc, status, session);
 				return "redirect:listQuery";
 			}
