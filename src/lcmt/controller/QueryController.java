@@ -31,6 +31,7 @@ import lcmt.service.LocationService;
 import lcmt.service.OrganizationService;
 import lcmt.service.QueryService;
 import lcmt.service.UserService;
+import lcmt.util.InputValidator;
 
 @Controller
 @RequestMapping("/*")
@@ -96,8 +97,10 @@ public class QueryController {
 			if(draft.equals("Draft")){
 				status = "Draft";	
 			}
-			queryService.persist(query_reference, query_doc,id, session, status);
-			return "redirect:listQuery";
+			if(InputValidator.validateInputNoSpecialChars(query_reference.getQuer_query())) {
+				queryService.persist(query_reference, query_doc,id, session, status);
+				return "redirect:listQuery";
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -143,8 +146,12 @@ public class QueryController {
 			if(draft.equals("Draft")){
 				status = "Draft";	
 			}
-			queryService.updateQuery(query_Reference, query_doc, status, session);
-			return "redirect:listQuery";
+			
+			if(InputValidator.validateInputNoSpecialChars(query_Reference.getQuer_query())) {
+				queryService.updateQuery(query_Reference, query_doc, status, session);
+				return "redirect:listQuery";
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

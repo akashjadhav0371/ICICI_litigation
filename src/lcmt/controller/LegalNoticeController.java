@@ -47,6 +47,7 @@ import lcmt.service.LegalNoticeService;
 import lcmt.service.LitigationService;
 import lcmt.service.OrganizationService;
 import lcmt.service.UserService;
+import lcmt.util.InputValidator;
 
 @Controller
 @RequestMapping("/*")
@@ -137,8 +138,18 @@ public class LegalNoticeController {
 			if (draft.equals("Draft")) {
 				status = "Draft";
 			}
+			if(InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_opposite_party())
+			 &&	InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_reference_no())
+				&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_addressed_to())
+				&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_opposite_party_advocate())
+				&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_relevant_law())
+				&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_comments())
+				&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_prayer_details())
+				&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_intern_cont_person())
+				) {
 			legalNoticeService.saveLegalNotice(legalNotice_Reference, id, legal_doc, session, status);
 			return "redirect:listLegalNotice";
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -226,8 +237,20 @@ public class LegalNoticeController {
 			if (draft.equals("Draft")) {
 				status = "Draft";
 			}
-			legalNoticeService.updateLegalNotice(legalNotice_Reference, legal_doc, status, session);
-			return "redirect:listLegalNotice";
+			if(InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_opposite_party())
+					 &&	InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_reference_no())
+						&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_addressed_to())
+						&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_opposite_party_advocate())
+						&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_relevant_law())
+						&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_comments())
+						&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_prayer_details())
+						&&	 InputValidator.validateInputNoSpecialChars(legalNotice_Reference.getLega_noti_intern_cont_person())
+						) {
+				legalNoticeService.updateLegalNotice(legalNotice_Reference, legal_doc, status, session);
+				return "redirect:listLegalNotice";	
+			}
+		
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
